@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — KOINA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0B1C2C; --navy-light: #1a3450; --gold: #F4C430; --gold-dark: #d4a820;
+      --white: #fff; --off-white: #f8f7f4; --gray: #9a9ea8; --gray-dark: #4a5568;
+      --gray-light: #f0eff0; --green: #48bb78; --red: #e53e3e; --orange: #ed8936;
+      --radius: 14px; --radius-sm: 8px;
+      --shadow: 0 4px 20px rgba(11,28,44,0.1);
+      --shadow-lg: 0 12px 40px rgba(11,28,44,0.15);
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--off-white); color: var(--navy); min-height: 100vh; }
+
+    /* Loader */
+    #loader { position: fixed; inset: 0; background: var(--navy); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; transition: opacity 0.5s, visibility 0.5s; }
+    #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader-logo { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); font-weight: 700; }
+    .loader-bar { width: 160px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 99px; overflow: hidden; }
+    .loader-fill { height: 100%; background: var(--gold); border-radius: 99px; animation: load 1.4s ease forwards; }
+    @keyframes load { from { width: 0; } to { width: 100%; } }
+
+    /* Access Denied Screen */
+    #access-denied { display: none; position: fixed; inset: 0; background: var(--navy); z-index: 8000; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; text-align: center; padding: 2rem; }
+    #access-denied.show { display: flex; }
+    #access-denied h2 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 2rem; }
+    #access-denied p { color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 400px; line-height: 1.65; }
+    #access-denied .icon { font-size: 4rem; }
+
+    /* Layout */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 240px; background: var(--navy); color: white; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s; overflow-y: auto; }
+    .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+    .sidebar-logo .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--gold); font-weight: 700; }
+    .sidebar-logo .sub { font-size: 0.7rem; color: rgba(255,255,255,0.35); letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+    .sidebar-user { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .user-av { width: 38px; height: 38px; border-radius: 50%; background: var(--gold); color: var(--navy); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+    .user-name { font-size: 0.88rem; font-weight: 600; }
+    .role-pill { font-size: 0.68rem; background: rgba(244,196,48,0.2); color: var(--gold); padding: 2px 8px; border-radius: 99px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; display: inline-block; margin-top: 3px; }
+    .nav-section { padding: 0.75rem 1.5rem 0.25rem; font-size: 0.67rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.28); }
+    .nav-btn { display: flex; align-items: center; gap: 10px; padding: 0.75rem 1.5rem; font-size: 0.88rem; font-weight: 500; color: rgba(255,255,255,0.6); cursor: pointer; transition: 0.2s; border: none; background: none; width: 100%; text-align: left; font-family: 'DM Sans', sans-serif; }
+    .nav-btn:hover { color: white; background: rgba(255,255,255,0.07); }
+    .nav-btn.active { color: var(--gold); background: rgba(244,196,48,0.1); border-left: 3px solid var(--gold); }
+    .nav-btn .badge { margin-left: auto; background: var(--red); color: white; font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; min-width: 20px; text-align: center; }
+    .sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); margin-top: auto; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+    .back-btn { display: block; text-align: center; padding: 9px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); border-radius: var(--radius-sm); font-size: 0.84rem; font-weight: 500; text-decoration: none; transition: 0.2s; }
+    .back-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+    .logout-btn { width: 100%; padding: 9px; background: rgba(229,62,62,0.18); border: 1.5px solid rgba(229,62,62,0.35); color: #fc8181; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: 0.2s; }
+    .logout-btn:hover { background: rgba(229,62,62,0.35); color: white; }
+
+    /* Main */
+    .main { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar { background: white; padding: 1rem 1.75rem; border-bottom: 1px solid rgba(11,28,44,0.07); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); flex-shrink: 0; }
+    .topbar h1 { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 700; }
+    .content { padding: 1.75rem; flex: 1; }
+
+    /* Hamburger */
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--navy); border-radius: 2px; }
+
+    /* Tabs */
+    .tab { display: none; }
+    .tab.active { display: block; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.75rem; }
+    .stat-card { background: white; border-radius: var(--radius); padding: 1.4rem; border: 1px solid rgba(11,28,44,0.07); box-shadow: var(--shadow); }
+    .stat-card.dark { background: var(--navy); }
+    .stat-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .stat-card.dark .stat-num { color: var(--gold); }
+    .stat-label { font-size: 0.8rem; color: var(--gray); font-weight: 500; }
+    .stat-card.dark .stat-label { color: rgba(255,255,255,0.5); }
+    .stat-hint { font-size: 0.75rem; font-weight: 600; margin-top: 4px; }
+    .stat-hint.warn { color: var(--orange); }
+    .stat-hint.good { color: var(--green); }
+
+    /* Section header */
+    .section-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .section-hd h2 { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; }
+    .count-tag { font-size: 0.8rem; color: var(--gray); background: var(--off-white); padding: 3px 10px; border-radius: 99px; border: 1px solid rgba(11,28,44,0.08); }
+
+    /* Filter tabs */
+    .filters { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .ftab { padding: 7px 16px; border-radius: 99px; font-size: 0.83rem; font-weight: 600; border: 1.5px solid rgba(11,28,44,0.12); background: white; color: var(--gray-dark); cursor: pointer; transition: 0.2s; font-family: 'DM Sans', sans-serif; }
+    .ftab.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+    /* Review cards */
+    .card-list { display: flex; flex-direction: column; gap: 1rem; }
+    .rcard { background: white; border-radius: var(--radius); padding: 1.4rem; border: 1px solid rgba(11,28,44,0.07); box-shadow: var(--shadow); animation: up 0.3s ease; }
+    @keyframes up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .rcard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.6rem; gap: 1rem; }
+    .rcard-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .rcard-meta { font-size: 0.8rem; color: var(--gray); display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .rcard-body { font-size: 0.88rem; color: var(--gray-dark); line-height: 1.65; margin-bottom: 1.1rem; }
+    .rcard-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+    .reject-reason { font-size: 0.81rem; color: var(--red); margin-bottom: 1rem; padding: 8px 12px; background: rgba(229,62,62,0.06); border-radius: 8px; border-left: 3px solid var(--red); }
+
+    /* Status pills */
+    .pill { font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+    .pill.pending { background: rgba(237,137,54,0.12); color: var(--orange); border: 1px solid rgba(237,137,54,0.3); }
+    .pill.approved { background: rgba(72,187,120,0.12); color: var(--green); border: 1px solid rgba(72,187,120,0.3); }
+    .pill.rejected { background: rgba(229,62,62,0.1); color: var(--red); border: 1px solid rgba(229,62,62,0.25); }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 0.84rem; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; font-family: 'DM Sans', sans-serif; text-decoration: none; }
+    .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+    .btn-approve { background: rgba(72,187,120,0.12); color: var(--green); border: 1px solid rgba(72,187,120,0.3); }
+    .btn-approve:hover { background: var(--green); color: white; }
+    .btn-reject { background: rgba(229,62,62,0.1); color: var(--red); border: 1px solid rgba(229,62,62,0.25); }
+    .btn-reject:hover { background: var(--red); color: white; }
+    .btn-del { background: rgba(229,62,62,0.08); color: var(--red); border: 1px solid rgba(229,62,62,0.15); }
+    .btn-del:hover { background: var(--red); color: white; }
+    .btn-navy { background: var(--navy); color: white; }
+    .btn-navy:hover { background: var(--navy-light); }
+    .btn-outline { background: var(--off-white); color: var(--navy); border: 1px solid rgba(11,28,44,0.12); }
+    .btn-gold { background: var(--gold); color: var(--navy); }
+    .btn-gold:hover { background: var(--gold-dark); }
+
+    /* Users table */
+    .users-table { background: white; border-radius: var(--radius); border: 1px solid rgba(11,28,44,0.07); overflow: hidden; box-shadow: var(--shadow); }
+    .t-head { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 80px; gap: 1rem; padding: 0.85rem 1.5rem; background: var(--off-white); border-bottom: 1px solid rgba(11,28,44,0.07); font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); }
+    .t-row { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 80px; gap: 1rem; padding: 0.95rem 1.5rem; border-bottom: 1px solid rgba(11,28,44,0.05); align-items: center; transition: 0.15s; }
+    .t-row:last-child { border-bottom: none; }
+    .t-row:hover { background: rgba(244,196,48,0.04); }
+    .u-cell { display: flex; align-items: center; gap: 10px; }
+    .u-av { width: 36px; height: 36px; border-radius: 50%; background: var(--navy); color: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
+    .u-name { font-weight: 600; font-size: 0.88rem; }
+    .u-church { font-size: 0.76rem; color: var(--gray); }
+    .role-sel { padding: 6px 10px; border: 1.5px solid rgba(11,28,44,0.12); border-radius: var(--radius-sm); font-size: 0.82rem; font-family: 'DM Sans', sans-serif; outline: none; cursor: pointer; background: white; transition: 0.2s; }
+    .role-sel:focus { border-color: var(--gold); }
+    .promote-btn { padding: 6px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 700; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: 0.2s; }
+    .promote-btn.to-mod { background: rgba(124,58,237,0.12); color: #7c3aed; border: 1px solid rgba(124,58,237,0.3); }
+    .promote-btn.to-mod:hover { background: #7c3aed; color: white; }
+    .promote-btn.to-member { background: rgba(72,187,120,0.1); color: var(--green); border: 1px solid rgba(72,187,120,0.3); }
+    .promote-btn.to-member:hover { background: var(--green); color: white; }
+
+    /* Empty state */
+    .empty { text-align: center; padding: 3.5rem 2rem; color: var(--gray); }
+    .empty .icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; }
+    .empty p { font-size: 0.95rem; }
+
+    /* Modal */
+    .overlay { position: fixed; inset: 0; background: rgba(11,28,44,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(4px); }
+    .overlay.open { opacity: 1; visibility: visible; }
+    .modal { background: white; border-radius: var(--radius); padding: 2rem; max-width: 460px; width: 100%; transform: scale(0.95) translateY(10px); transition: 0.3s; box-shadow: var(--shadow-lg); }
+    .overlay.open .modal { transform: scale(1) translateY(0); }
+    .modal h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 1rem; }
+    .modal label { font-size: 0.84rem; font-weight: 600; display: block; margin-bottom: 5px; color: var(--navy); }
+    .modal select, .modal textarea { width: 100%; padding: 10px 12px; border: 1.5px solid rgba(11,28,44,0.12); border-radius: var(--radius-sm); font-size: 0.9rem; outline: none; font-family: 'DM Sans', sans-serif; transition: 0.2s; color: var(--navy); }
+    .modal select:focus, .modal textarea:focus { border-color: var(--gold); }
+    .modal textarea { resize: none; height: 80px; margin-top: 0.75rem; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; justify-content: flex-end; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--navy); color: white; padding: 12px 20px; border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 500; z-index: 2000; transform: translateY(80px); opacity: 0; transition: 0.3s; box-shadow: var(--shadow-lg); max-width: 320px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+      .main { margin-left: 0; }
+      .hamburger { display: flex; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .t-head, .t-row { grid-template-columns: 2fr 1fr 80px; }
+      .col-church, .col-joined { display: none; }
+      .content { padding: 1.25rem; }
+      .topbar { padding: 0.9rem 1.25rem; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .stat-card { padding: 1rem; }
+      .stat-num { font-size: 1.6rem; }
+      .rcard { padding: 1.1rem; }
+      .btn { padding: 7px 12px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="loader-logo">KOINA</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- Access Denied -->
+<div id="access-denied">
+  <div class="icon">🔒</div>
+  <h2>Access Denied</h2>
+  <p>You don't have permission to access the admin panel. Only admins and moderators can enter.</p>
+  <a href="index.html" style="margin-top:1rem;display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:var(--navy);padding:12px 28px;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.95rem;">← Go Back to Site</a>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Reject Modal -->
+<div class="overlay" id="reject-modal">
+  <div class="modal">
+    <h3>❌ Reject Submission</h3>
+    <label>Reason for rejection</label>
+    <select id="reject-reason">
+      <option>Incomplete information</option>
+      <option>Suspicious / Looks like a scam</option>
+      <option>Spam</option>
+      <option>Inappropriate content</option>
+      <option>Duplicate listing</option>
+    </select>
+    <label>Additional note (optional)</label>
+    <textarea id="reject-note" placeholder="Add extra details for the user..."></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-reject" onclick="confirmReject()">Confirm Rejection</button>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo">KOINA</div>
+      <div class="sub">Admin Panel</div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-av" id="admin-av">?</div>
+      <div>
+        <div class="user-name" id="admin-name">Loading...</div>
+        <span class="role-pill" id="admin-role">—</span>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-section">Overview</div>
+      <button class="nav-btn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+      <div class="nav-section">Review Queue</div>
+      <button class="nav-btn" onclick="showTab('skills',this)">🛒 Skill Listings <span class="badge" id="b-skills">0</span></button>
+      <button class="nav-btn" onclick="showTab('posts',this)">📝 Community Posts <span class="badge" id="b-posts">0</span></button>
+      <button class="nav-btn" onclick="showTab('requests',this)">🤝 Hub Requests <span class="badge" id="b-req">0</span></button>
+      <div class="nav-section" id="users-section">Management</div>
+      <button class="nav-btn" onclick="showTab('users',this)" id="users-nav-btn">👥 Members</button>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="index.html" class="back-btn">← Back to Site</a>
+      <button class="logout-btn" onclick="adminLogout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">
+          <span></span><span></span><span></span>
+        </button>
+        <h1 id="page-title">Dashboard</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span id="topbar-user" style="font-size:0.85rem;color:var(--gray-dark);font-weight:500;"></span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="tab active" id="tab-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card dark">
+            <div class="stat-icon">👥</div>
+            <div class="stat-num" id="stat-members">—</div>
+            <div class="stat-label">Total Members</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-num" id="stat-pending-skills" style="color:var(--orange)">—</div>
+            <div class="stat-label">Pending Skills</div>
+            <div class="stat-hint warn">Needs review</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-num" id="stat-pending-posts" style="color:var(--orange)">—</div>
+            <div class="stat-label">Pending Posts</div>
+            <div class="stat-hint warn">Needs review</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-num" id="stat-approved" style="color:var(--green)">—</div>
+            <div class="stat-label">Live Skills</div>
+            <div class="stat-hint good">In marketplace</div>
+          </div>
+        </div>
+        <div class="section-hd">
+          <h2>🔔 Recent Pending Submissions</h2>
+          <button class="btn btn-navy btn-sm" onclick="showTab('skills',document.querySelectorAll('.nav-btn')[1])">Review All →</button>
+        </div>
+        <div class="card-list" id="recent-list">
+          <div class="empty"><div class="icon">⏳</div><p>Loading...</p></div>
+        </div>
+      </div>
+
+      <!-- ══ SKILLS ══ -->
+      <div class="tab" id="tab-skills">
+        <div class="filters">
+          <button class="ftab active" onclick="filterSkills('pending',this)">⏳ Pending</button>
+          <button class="ftab" onclick="filterSkills('approved',this)">✅ Approved</button>
+          <button class="ftab" onclick="filterSkills('rejected',this)">❌ Rejected</button>
+          <button class="ftab" onclick="filterSkills('all',this)">All</button>
+        </div>
+        <div class="section-hd">
+          <h2>🛒 Skill Listings</h2>
+          <span class="count-tag" id="skills-count">Loading...</span>
+        </div>
+        <div class="card-list" id="skills-list"></div>
+      </div>
+
+      <!-- ══ POSTS ══ -->
+      <div class="tab" id="tab-posts">
+        <div class="filters">
+          <button class="ftab active" onclick="filterPosts('pending',this)">⏳ Pending</button>
+          <button class="ftab" onclick="filterPosts('approved',this)">✅ Approved</button>
+          <button class="ftab" onclick="filterPosts('rejected',this)">❌ Rejected</button>
+        </div>
+        <div class="section-hd">
+          <h2>📝 Community Posts</h2>
+          <span class="count-tag" id="posts-count">Loading...</span>
+        </div>
+        <div class="card-list" id="posts-list"></div>
+      </div>
+
+      <!-- ══ REQUESTS ══ -->
+      <div class="tab" id="tab-requests">
+        <div class="filters">
+          <button class="ftab active" onclick="filterRequests('pending',this)">⏳ Pending</button>
+          <button class="ftab" onclick="filterRequests('approved',this)">✅ Approved</button>
+          <button class="ftab" onclick="filterRequests('rejected',this)">❌ Rejected</button>
+        </div>
+        <div class="section-hd">
+          <h2>🤝 Hub Requests</h2>
+          <span class="count-tag" id="req-count">Loading...</span>
+        </div>
+        <div class="card-list" id="req-list"></div>
+      </div>
+
+      <!-- ══ USERS (Admin only) ══ -->
+      <div class="tab" id="tab-users">
+        <div class="section-hd">
+          <h2>👥 All Members</h2>
+          <span class="count-tag" id="users-count">Loading...</span>
+        </div>
+        <div style="background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1.25rem;font-size:0.85rem;color:#5b21b6;">
+          <strong>⚙️ Role Management:</strong> Use the dropdowns to promote members to Moderators or demote them back to Members. Moderators can review and approve content.
+        </div>
+        <div class="users-table">
+          <div class="t-head">
+            <div>Member</div>
+            <div>Role / Promote</div>
+            <div class="col-church">Church</div>
+            <div class="col-joined">Joined</div>
+            <div>Action</div>
+          </div>
+          <div id="users-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+/* ════════════════════════════════════════
+   KOINA Admin Panel — Full Supabase Version
+   ════════════════════════════════════════ */
+
+let adminUser = null;
+let adminProfile = null;
+let rejectTarget = null;
+let skillsFilter = 'pending';
+let postsFilter  = 'pending';
+let reqFilter    = 'pending';
+
+// ── Loader ──
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1400);
+});
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── Helpers ──
+function initials(name) {
+  if (!name) return '?';
+  const p = name.trim().split(' ');
+  return (p[0]?.[0] || '') + (p[1]?.[0] || p[0]?.[1] || '');
+}
+function timeAgo(d) {
+  const diff = Math.floor((new Date() - new Date(d)) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return new Date(d).toLocaleDateString();
+}
+function esc(t) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(t||''));
+  return d.innerHTML;
+}
+
+// ── Auth Guard ──
+async function initAdmin() {
+  const { data: { session } } = await _supabase.auth.getSession();
+
+  // Not logged in → go to login
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  adminUser = session.user;
+
+  // Load profile
+  const { data: profile } = await _supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', adminUser.id)
+    .single();
+
+  adminProfile = profile;
+  const role = profile?.role || 'member';
+
+  // ── ACCESS CONTROL ──
+  // Only admin and moderator can enter
+  if (!['admin','moderator'].includes(role)) {
+    document.getElementById('loader').classList.add('hidden');
+    document.getElementById('access-denied').classList.add('show');
+    return;
+  }
+
+  // Moderators cannot see the Users/Members tab
+  if (role === 'moderator') {
+    document.getElementById('users-nav-btn').style.display = 'none';
+    document.getElementById('users-section').style.display = 'none';
+  }
+
+  // Show admin info in sidebar
+  const displayName = profile?.display_name || adminUser.email?.split('@')[0] || 'Admin';
+  document.getElementById('admin-av').textContent = initials(displayName);
+  document.getElementById('admin-name').textContent = displayName;
+  document.getElementById('admin-role').textContent = role;
+  document.getElementById('topbar-user').textContent = `Logged in as ${displayName}`;
+
+  // Load dashboard
+  await loadDashboard();
+
+  // Real-time badge updates
+  _supabase.channel('admin-rt')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'skill_profiles' }, updateBadges)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, updateBadges)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'requests' }, updateBadges)
+    .subscribe();
+}
+
+// ── Logout ──
+async function adminLogout() {
+  await _supabase.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+// ── Tab switching ──
+function showTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  const titles = { dashboard:'Dashboard', skills:'Skill Listings', posts:'Community Posts', requests:'Hub Requests', users:'Members' };
+  document.getElementById('page-title').textContent = titles[name] || name;
+  document.getElementById('sidebar').classList.remove('open');
+
+  if (name === 'skills')   loadSkills();
+  if (name === 'posts')    loadPosts();
+  if (name === 'requests') loadRequests();
+  if (name === 'users')    loadUsers();
+}
+
+// ── Badges ──
+async function updateBadges() {
+  const [{ count: ps }, { count: pp }, { count: pr }] = await Promise.all([
+    _supabase.from('skill_profiles').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    _supabase.from('posts').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    _supabase.from('requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+  ]);
+  document.getElementById('b-skills').textContent = ps || 0;
+  document.getElementById('b-posts').textContent  = pp || 0;
+  document.getElementById('b-req').textContent    = pr || 0;
+  document.getElementById('stat-pending-skills').textContent = ps || 0;
+  document.getElementById('stat-pending-posts').textContent  = pp || 0;
+}
+
+// ── Dashboard ──
+async function loadDashboard() {
+  const [
+    { count: members },
+    { count: pendingSkills },
+    { count: pendingPosts },
+    { count: approved },
+    { data: recent }
+  ] = await Promise.all([
+    _supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    _supabase.from('skill_profiles').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    _supabase.from('posts').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    _supabase.from('skill_profiles').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
+    _supabase.from('skill_profiles').select('*, profiles(display_name, church, location)').eq('status', 'pending').order('created_at', { ascending: false }).limit(5)
+  ]);
+
+  document.getElementById('stat-members').textContent       = members || 0;
+  document.getElementById('stat-pending-skills').textContent = pendingSkills || 0;
+  document.getElementById('stat-pending-posts').textContent  = pendingPosts || 0;
+  document.getElementById('stat-approved').textContent      = approved || 0;
+  document.getElementById('b-skills').textContent = pendingSkills || 0;
+  document.getElementById('b-posts').textContent  = pendingPosts || 0;
+
+  const list = document.getElementById('recent-list');
+  if (!recent?.length) {
+    list.innerHTML = `<div class="empty"><div class="icon">🎉</div><p>No pending submissions. All caught up!</p></div>`;
+    return;
+  }
+  list.innerHTML = recent.map(s => renderSkillCard(s)).join('');
+}
+
+// ── Skills ──
+async function loadSkills() {
+  document.getElementById('skills-list').innerHTML = `<div class="empty"><div class="icon">⏳</div><p>Loading...</p></div>`;
+  let q = _supabase.from('skill_profiles').select('*, profiles(id, display_name, church, location)').order('created_at', { ascending: false });
+  if (skillsFilter !== 'all') q = q.eq('status', skillsFilter);
+  const { data } = await q;
+  document.getElementById('skills-count').textContent = `${(data||[]).length} listing${(data||[]).length !== 1 ? 's' : ''}`;
+  document.getElementById('skills-list').innerHTML = data?.length
+    ? data.map(s => renderSkillCard(s)).join('')
+    : `<div class="empty"><div class="icon">🎉</div><p>No ${skillsFilter} skill listings.</p></div>`;
+}
+
+function filterSkills(f, btn) {
+  skillsFilter = f;
+  document.querySelectorAll('#tab-skills .ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadSkills();
+}
+
+function renderSkillCard(s) {
+  const name = s.profiles?.display_name || 'Unknown';
+  const isPending = s.status === 'pending';
+  return `
+  <div class="rcard" id="sc-${s.id}">
+    <div class="rcard-top">
+      <div>
+        <div class="rcard-title">${esc(s.skill)} — ${esc(name)}</div>
+        <div class="rcard-meta">
+          <span>📂 ${s.category}</span>
+          ${s.profiles?.church ? `<span>⛪ ${esc(s.profiles.church)}</span>` : ''}
+          ${s.profiles?.location ? `<span>📍 ${esc(s.profiles.location)}</span>` : ''}
+          <span>🕐 ${timeAgo(s.created_at)}</span>
+        </div>
+      </div>
+      <span class="pill ${s.status}">${s.status}</span>
+    </div>
+    <div class="rcard-body">${esc(s.description||'')}</div>
+    ${s.rejection_reason ? `<div class="reject-reason">Rejected: ${esc(s.rejection_reason)}</div>` : ''}
+    <div class="rcard-actions">
+      ${isPending ? `
+        <button class="btn btn-approve" onclick="approve('skill_profiles','${s.id}','${s.profiles?.id||''}','${esc(name)}','${esc(s.skill)}')">✅ Approve</button>
+        <button class="btn btn-reject" onclick="openReject('skill_profiles','${s.id}','${s.profiles?.id||''}','${esc(name)}')">❌ Reject</button>
+      ` : ''}
+      <button class="btn btn-del btn-sm" onclick="deleteItem('skill_profiles','${s.id}','sc-${s.id}')">🗑 Delete</button>
+      ${s.whatsapp ? `<a href="https://wa.me/${s.whatsapp}" target="_blank" class="btn btn-sm" style="background:rgba(37,211,102,0.1);color:#1fba59;border:1px solid rgba(37,211,102,0.3);">💬 WhatsApp</a>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Posts ──
+async function loadPosts() {
+  document.getElementById('posts-list').innerHTML = `<div class="empty"><div class="icon">⏳</div><p>Loading...</p></div>`;
+  let q = _supabase.from('posts').select('*, profiles(id, display_name)').order('created_at', { ascending: false });
+  if (postsFilter !== 'all') q = q.eq('status', postsFilter);
+  const { data } = await q;
+  document.getElementById('posts-count').textContent = `${(data||[]).length} post${(data||[]).length !== 1 ? 's' : ''}`;
+  document.getElementById('posts-list').innerHTML = data?.length ? data.map(p => `
+    <div class="rcard" id="pc-${p.id}">
+      <div class="rcard-top">
+        <div>
+          <div class="rcard-title">${esc(p.profiles?.display_name||'Unknown')} · <span style="font-weight:400;font-size:0.85rem;font-family:'DM Sans',sans-serif;">${p.tag||'General'}</span></div>
+          <div class="rcard-meta"><span>🕐 ${timeAgo(p.created_at)}</span></div>
+        </div>
+        <span class="pill ${p.status}">${p.status}</span>
+      </div>
+      <div class="rcard-body">${esc(p.content)}</div>
+      ${p.rejection_reason ? `<div class="reject-reason">Rejected: ${esc(p.rejection_reason)}</div>` : ''}
+      <div class="rcard-actions">
+        ${p.status === 'pending' ? `
+          <button class="btn btn-approve" onclick="approve('posts','${p.id}','${p.profiles?.id||''}','${esc(p.profiles?.display_name||'')}','post')">✅ Approve</button>
+          <button class="btn btn-reject" onclick="openReject('posts','${p.id}','${p.profiles?.id||''}','${esc(p.profiles?.display_name||'')}')">❌ Reject</button>
+        ` : ''}
+        <button class="btn btn-del btn-sm" onclick="deleteItem('posts','${p.id}','pc-${p.id}')">🗑 Delete</button>
+      </div>
+    </div>`).join('')
+    : `<div class="empty"><div class="icon">🎉</div><p>No ${postsFilter} posts.</p></div>`;
+}
+
+function filterPosts(f, btn) {
+  postsFilter = f;
+  document.querySelectorAll('#tab-posts .ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadPosts();
+}
+
+// ── Requests ──
+async function loadRequests() {
+  document.getElementById('req-list').innerHTML = `<div class="empty"><div class="icon">⏳</div><p>Loading...</p></div>`;
+  let q = _supabase.from('requests').select('*, profiles(id, display_name, church)').order('created_at', { ascending: false });
+  if (reqFilter !== 'all') q = q.eq('status', reqFilter);
+  const { data } = await q;
+  document.getElementById('req-count').textContent = `${(data||[]).length} request${(data||[]).length !== 1 ? 's' : ''}`;
+  document.getElementById('req-list').innerHTML = data?.length ? data.map(r => `
+    <div class="rcard" id="rc-${r.id}">
+      <div class="rcard-top">
+        <div>
+          <div class="rcard-title">${esc(r.title)}</div>
+          <div class="rcard-meta">
+            <span>👤 ${esc(r.profiles?.display_name||'Unknown')}</span>
+            ${r.profiles?.church ? `<span>⛪ ${esc(r.profiles.church)}</span>` : ''}
+            <span>📂 ${r.category}</span>
+            <span>🕐 ${timeAgo(r.created_at)}</span>
+          </div>
+        </div>
+        <span class="pill ${r.status}">${r.status}</span>
+      </div>
+      <div class="rcard-body">${esc(r.description)}</div>
+      ${r.rejection_reason ? `<div class="reject-reason">Rejected: ${esc(r.rejection_reason)}</div>` : ''}
+      <div class="rcard-actions">
+        ${r.status === 'pending' ? `
+          <button class="btn btn-approve" onclick="approve('requests','${r.id}','${r.profiles?.id||''}','${esc(r.profiles?.display_name||'')}','${esc(r.title)}')">✅ Approve</button>
+          <button class="btn btn-reject" onclick="openReject('requests','${r.id}','${r.profiles?.id||''}','${esc(r.profiles?.display_name||'')}')">❌ Reject</button>
+        ` : ''}
+        <button class="btn btn-del btn-sm" onclick="deleteItem('requests','${r.id}','rc-${r.id}')">🗑 Delete</button>
+        ${r.contact ? `<a href="https://wa.me/${r.contact}" target="_blank" class="btn btn-sm" style="background:rgba(37,211,102,0.1);color:#1fba59;border:1px solid rgba(37,211,102,0.3);">💬 WhatsApp</a>` : ''}
+      </div>
+    </div>`).join('')
+    : `<div class="empty"><div class="icon">🎉</div><p>No ${reqFilter} requests.</p></div>`;
+}
+
+function filterRequests(f, btn) {
+  reqFilter = f;
+  document.querySelectorAll('#tab-requests .ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadRequests();
+}
+
+// ── Users (Admin only) ──
+async function loadUsers() {
+  if (adminProfile?.role !== 'admin') return;
+  const { data } = await _supabase.from('profiles').select('*').order('joined_at', { ascending: false });
+  document.getElementById('users-count').textContent = `${(data||[]).length} members`;
+  document.getElementById('users-list').innerHTML = (data||[]).map(u => {
+    const isMe = u.id === adminUser?.id;
+    const isAdmin = u.role === 'admin';
+    return `
+    <div class="t-row" id="ur-${u.id}">
+      <div class="u-cell">
+        <div class="u-av">${initials(u.display_name)}</div>
+        <div>
+          <div class="u-name">${esc(u.display_name||'No name')}</div>
+          <div class="u-church">${esc(u.location||'')}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        ${isMe || isAdmin
+          ? `<span class="pill approved">${u.role}${isMe ? ' (you)' : ''}</span>`
+          : `<select class="role-sel" onchange="updateRole('${u.id}', this.value)" title="Change role">
+              <option value="member" ${u.role==='member'?'selected':''}>👤 Member</option>
+              <option value="moderator" ${u.role==='moderator'?'selected':''}>🛡 Moderator</option>
+            </select>
+            ${u.role === 'member'
+              ? `<button class="promote-btn to-mod" onclick="updateRole('${u.id}','moderator')" title="Promote to Moderator">⬆️ Promote</button>`
+              : `<button class="promote-btn to-member" onclick="updateRole('${u.id}','member')" title="Demote to Member">⬇️ Demote</button>`
+            }`
+        }
+      </div>
+      <div class="col-church" style="font-size:0.84rem;color:var(--gray)">${esc(u.church||'—')}</div>
+      <div class="col-joined" style="font-size:0.8rem;color:var(--gray)">${u.joined_at ? new Date(u.joined_at).toLocaleDateString() : '—'}</div>
+      <div>
+        ${!isMe && !isAdmin ? `<button class="btn btn-del btn-sm" onclick="deleteUser('${u.id}')">🗑</button>` : ''}
+      </div>
+    </div>`;
+  }).join('') || `<div class="empty" style="padding:2rem;"><p>No members yet.</p></div>`;
+}
+
+async function updateRole(userId, newRole) {
+  const { error } = await _supabase.from('profiles').update({ role: newRole }).eq('id', userId);
+  if (error) { showToast('❌ Failed to update role: ' + error.message); return; }
+  showToast(`✅ Role updated to ${newRole}!`);
+
+  // Notify the user
+  await _supabase.from('notifications').insert({
+    user_id: userId, type: 'role_update',
+    title: `👑 Your role has been updated`,
+    message: `You have been assigned the role: ${newRole} on KOINA.`,
+    created_at: new Date().toISOString()
+  });
+
+  await loadUsers();
+}
+
+async function deleteUser(userId) {
+  if (!confirm('Delete this user permanently? This cannot be undone.')) return;
+  const { error } = await _supabase.from('profiles').delete().eq('id', userId);
+  if (error) { showToast('❌ Failed to delete user'); return; }
+  document.getElementById('ur-' + userId)?.remove();
+  showToast('🗑 User deleted.');
+}
+
+// ── Approve ──
+async function approve(table, id, userId, userName, itemTitle) {
+  const { error } = await _supabase.from(table).update({ status: 'approved' }).eq('id', id);
+  if (error) { showToast('❌ Error: ' + error.message); return; }
+
+  const prefix = table === 'skill_profiles' ? 'sc' : table === 'posts' ? 'pc' : 'rc';
+  document.getElementById(`${prefix}-${id}`)?.remove();
+  showToast('✅ Approved! Member has been notified.');
+
+  // Notify user
+  if (userId) {
+    const msgs = {
+      skill_profiles: { title: '🎉 Your skill is live!', msg: `Your skill listing "${itemTitle}" has been approved and is now in the marketplace!` },
+      posts:          { title: '✅ Your post is live!',  msg: `Your community post has been approved and is now visible.` },
+      requests:       { title: '✅ Your request is live!', msg: `Your hub request "${itemTitle}" has been approved.` }
+    };
+    const m = msgs[table];
+    await _supabase.from('notifications').insert({
+      user_id: userId, type: 'approved',
+      title: m.title, message: m.msg,
+      created_at: new Date().toISOString()
+    });
+  }
+
+  updateBadges();
+  if (table === 'skill_profiles') loadDashboard();
+}
+
+// ── Reject Modal ──
+function openReject(table, id, userId, userName) {
+  rejectTarget = { table, id, userId, userName };
+  document.getElementById('reject-note').value = '';
+  document.getElementById('reject-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('reject-modal').classList.remove('open');
+  rejectTarget = null;
+}
+
+async function confirmReject() {
+  if (!rejectTarget) return;
+  const reason = document.getElementById('reject-reason').value;
+  const note   = document.getElementById('reject-note').value.trim();
+  const full   = note ? `${reason} — ${note}` : reason;
+  const { table, id, userId, userName } = rejectTarget;
+
+  const { error } = await _supabase.from(table).update({ status: 'rejected', rejection_reason: full }).eq('id', id);
+  if (error) { showToast('❌ Error: ' + error.message); return; }
+
+  const prefix = table === 'skill_profiles' ? 'sc' : table === 'posts' ? 'pc' : 'rc';
+  document.getElementById(`${prefix}-${id}`)?.remove();
+  showToast('❌ Rejected. Member has been notified.');
+  closeModal();
+
+  // Notify user
+  if (userId) {
+    await _supabase.from('notifications').insert({
+      user_id: userId, type: 'rejected',
+      title: '❌ Your submission was not approved',
+      message: `Your submission was rejected. Reason: ${full}. You may resubmit after making corrections.`,
+      created_at: new Date().toISOString()
+    });
+  }
+
+  updateBadges();
+}
+
+// ── Delete ──
+async function deleteItem(table, id, cardId) {
+  if (!confirm('Delete this permanently?')) return;
+  const { error } = await _supabase.from(table).delete().eq('id', id);
+  if (error) { showToast('❌ Delete failed'); return; }
+  document.getElementById(cardId)?.remove();
+  showToast('🗑 Deleted.');
+  updateBadges();
+}
+
+// Close modal on backdrop click
+document.getElementById('reject-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', initAdmin);
+</script>
+</body>
+</html>

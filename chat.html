@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Chat — KOINA</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✝️</text></svg>">
+</head>
+<body>
+  <div id="page-loader"><div class="loader-logo">KOINA</div><div class="loader-bar"><div class="loader-fill"></div></div></div>
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">KOINA <span>Faith · Skills · Community</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="marketplace.html">Marketplace</a></li>
+      <li><a href="hub.html">Connection Hub</a></li>
+      <li><a href="community.html">Community</a></li>
+      <li><a href="chat.html">Live Chat</a></li>
+      <li><a href="submit.html" class="nav-cta">List Your Skill</a></li>
+      <li id="nav-user" style="display:flex;align-items:center;gap:8px;margin-left:0.5rem;"></li>
+    </ul>
+    <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu">
+    <a href="index.html">Home</a><a href="marketplace.html">Marketplace</a>
+    <a href="hub.html">Connection Hub</a><a href="community.html">Community</a>
+    <a href="chat.html">Live Chat</a><a href="submit.html">List Your Skill</a>
+    <div id="nav-user-mobile" style="padding:12px 0;border-top:1px solid rgba(255,255,255,0.1);margin-top:4px;"></div>
+  </div>
+
+  <div class="page-wrapper">
+    <div style="padding:1.5rem 2rem 0;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+      <div>
+        <h2 style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;">💬 Live Chat Rooms</h2>
+        <p style="font-size:0.85rem;color:var(--gray);">Real-time community conversations</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--gray);">
+        <span style="width:8px;height:8px;border-radius:50%;background:#48bb78;display:inline-block;"></span>
+        Live
+      </div>
+    </div>
+
+    <div class="chat-layout" style="height:calc(100vh - 170px);">
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-header">Chat Rooms</div>
+        <div class="chat-room-list" id="room-list"></div>
+      </div>
+
+      <div class="chat-main">
+        <div class="chat-main-header">
+          <div class="room-icon" id="chat-room-icon" style="background:#f4c43022;color:var(--gold);font-size:1.3rem;">🌍</div>
+          <div>
+            <div class="name" id="chat-room-title">General</div>
+            <div class="members" id="chat-room-sub">Live <span class="online-dot"></span></div>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+          <div style="text-align:center;padding:2rem;color:var(--gray);font-size:0.88rem;">Loading messages...</div>
+        </div>
+
+        <div style="padding:0.5rem 1.5rem;background:rgba(244,196,48,0.07);border-top:1px solid rgba(244,196,48,0.15);font-size:0.78rem;color:var(--gray-dark);display:flex;align-items:center;gap:6px;">
+          <span>✝️</span><span><strong>Community Rule:</strong> Speak with grace. Let your words edify and encourage. Eph 4:29</span>
+        </div>
+
+        <div class="chat-input-bar">
+          <input type="text" id="chat-input" placeholder="Type a message and press Enter..." />
+          <button class="chat-send-btn" id="chat-send" title="Send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community — KOINA</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✝️</text></svg>">
+</head>
+<body>
+  <div id="page-loader"><div class="loader-logo">KOINA</div><div class="loader-bar"><div class="loader-fill"></div></div></div>
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">KOINA <span>Faith · Skills · Community</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="marketplace.html">Marketplace</a></li>
+      <li><a href="hub.html">Connection Hub</a></li>
+      <li><a href="community.html">Community</a></li>
+      <li><a href="chat.html">Live Chat</a></li>
+      <li><a href="submit.html" class="nav-cta">List Your Skill</a></li>
+      <li id="nav-user" style="display:flex;align-items:center;gap:8px;margin-left:0.5rem;"></li>
+    </ul>
+    <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu">
+    <a href="index.html">Home</a><a href="marketplace.html">Marketplace</a>
+    <a href="hub.html">Connection Hub</a><a href="community.html">Community</a>
+    <a href="chat.html">Live Chat</a><a href="submit.html">List Your Skill</a>
+    <div id="nav-user-mobile" style="padding:12px 0;border-top:1px solid rgba(255,255,255,0.1);margin-top:4px;"></div>
+  </div>
+
+  <div class="page-wrapper">
+    <section class="page-hero">
+      <div style="position:relative;z-index:1;">
+        <div class="section-label" style="justify-content:center;margin-bottom:1rem;">Community Feed</div>
+        <h1>One <span style="color:var(--gold)">Body</span>, Many Voices</h1>
+        <p>Share testimonies, ask for prayer, encourage one another, and build real Kingdom connections.</p>
+      </div>
+    </section>
+
+    <div class="community-layout">
+      <div class="post-box reveal">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+          <div id="current-user-avatar" style="width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;flex-shrink:0;">?</div>
+          <div><p style="font-weight:600;font-size:0.9rem;" id="current-user-name">Loading...</p><p style="font-size:0.78rem;color:var(--gray);">Share with your community</p></div>
+        </div>
+        <textarea id="post-textarea" placeholder="Share a testimony, encouragement, prayer need, or announcement..."></textarea>
+        <div class="post-box-footer">
+          <div class="tags">
+            <button class="tag-pill active" data-tag="General">General</button>
+            <button class="tag-pill" data-tag="Testimony">🎉 Testimony</button>
+            <button class="tag-pill" data-tag="Prayer">🙏 Prayer</button>
+            <button class="tag-pill" data-tag="Encouragement">💛 Encouragement</button>
+            <button class="tag-pill" data-tag="Request">📢 Request</button>
+          </div>
+          <button class="btn btn-primary btn-sm" id="post-btn">Post ➤</button>
+        </div>
+      </div>
+
+      <div style="background:linear-gradient(135deg,var(--navy),var(--navy-light));border-radius:var(--radius-lg);padding:1.5rem 2rem;margin-bottom:2rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);font-size:3rem;opacity:0.1;">✝️</div>
+        <div style="font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">Daily Verse</div>
+        <p style="color:white;font-style:italic;font-size:0.95rem;line-height:1.7;margin-bottom:0.5rem;">"Let the message of Christ dwell among you richly as you teach and admonish one another with all wisdom."</p>
+        <p style="font-size:0.8rem;color:rgba(255,255,255,0.5);font-weight:600;">— Colossians 3:16</p>
+      </div>
+
+      <div class="post-feed" id="post-feed">
+        <div style="text-align:center;padding:3rem;color:var(--gray);">Loading community posts...</div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-grid">
+        <div class="footer-brand"><div class="logo">KOINA</div><p>Connecting Christians through skills, services, and community.</p></div>
+        <div class="footer-col"><h4>Platform</h4><a href="marketplace.html">Marketplace</a><a href="hub.html">Connection Hub</a><a href="community.html">Community</a></div>
+        <div class="footer-col"><h4>Scripture</h4><p style="font-size:0.85rem;line-height:1.7;font-style:italic;">"And let us consider how to stir up one another to love and good works." — Hebrews 10:24</p></div>
+      </div>
+      <div class="footer-bottom"><span>© 2025 KOINA. Built with <span class="heart">♥</span> for the Kingdom.</span></div>
+    </footer>
+  </div>
+
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
