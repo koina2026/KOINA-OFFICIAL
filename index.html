@@ -254,6 +254,10 @@
       box-shadow: var(--shadow-lg);
       border-color: rgba(244,196,48,0.2);
     }
+    .team-card.reserved {
+      border: 2px dashed rgba(11,28,44,0.15);
+      background: rgba(11,28,44,0.02);
+    }
     .team-card.open {
       border: 2px dashed rgba(244,196,48,0.35);
       background: rgba(244,196,48,0.03);
@@ -553,12 +557,12 @@
         <div class="team-grid">
 
           <!-- 1 Reserved -->
-          <div class="team-card reveal">
-            <div class="team-avatar gold-bg">EH 
+          <div class="team-card reserved reveal">
+            <div class="team-avatar">🔒
               <div class="team-num">1</div>
             </div>
-            <div class="team-name">Henry E.I</span>
-            <div class="team-role">Full-Stack Engineering Lead</div>
+            <span class="open-badge reserved-tag">Reserved</span>
+            <div class="team-name">Lead Systems Architect</div>
             <div class="team-nickname">The Builder</div>
             <p class="team-desc">Responsible for the structural logic, database integrity, and backend stability of the KOINA ecosystem.</p>
           </div>
