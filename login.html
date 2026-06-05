@@ -7,570 +7,852 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
-
     :root {
-      --navy: #0B1C2C;
-      --navy-light: #1a3450;
-      --gold: #F4C430;
-      --gold-dark: #d4a820;
-      --white: #ffffff;
-      --off-white: #f8f7f4;
-      --gray: #9a9ea8;
-      --gray-dark: #4a5568;
+      --navy: #0B1C2C; --navy-light: #1a3450; --gold: #F4C430; --gold-dark: #d4a820;
+      --white: #fff; --off-white: #f8f7f4; --gray: #9a9ea8; --gray-dark: #4a5568;
+      --red: #e53e3e; --green: #48bb78; --orange: #ed8936;
       --shadow-md: 0 8px 32px rgba(11,28,44,0.18);
-      --radius: 14px;
-      --radius-sm: 8px;
-      --radius-lg: 24px;
+      --radius: 14px; --radius-sm: 8px; --radius-lg: 24px;
     }
+    body { font-family: 'DM Sans', sans-serif; background: var(--navy); min-height: 100vh; display: flex; }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--navy);
-      min-height: 100vh;
-      display: flex;
-      align-items: stretch;
-    }
-
-    /* ── Loader ── */
-    #page-loader {
-      position: fixed; inset: 0;
-      background: var(--navy);
-      z-index: 9999;
-      display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
+    /* Loader */
+    #page-loader { position: fixed; inset: 0; background: var(--navy); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; transition: opacity 0.5s, visibility 0.5s; }
     #page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
     .loader-logo { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--gold); font-weight: 700; letter-spacing: 2px; }
     .loader-bar { width: 180px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 99px; overflow: hidden; }
     .loader-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #f9dc7a); border-radius: 99px; animation: load 1.4s ease forwards; }
-    @keyframes load { from { width: 0; } to { width: 100%; } }
+    @keyframes load { from{width:0} to{width:100%} }
 
-    /* ── Split layout ── */
-    .auth-split {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 100vh;
-      width: 100%;
-    }
+    /* Split layout */
+    .auth-split { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; width: 100%; }
 
-    /* ── Brand panel ── */
-    .auth-brand {
-      background: var(--navy);
-      display: flex; align-items: center; justify-content: center;
-      padding: 3rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .auth-brand::before {
-      content: '';
-      position: absolute; inset: 0;
-      background-image: linear-gradient(rgba(244,196,48,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(244,196,48,0.04) 1px, transparent 1px);
-      background-size: 50px 50px;
-    }
-    .brand-glow {
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse 80% 70% at 30% 50%, rgba(244,196,48,0.1), transparent 70%);
-      pointer-events: none;
-    }
-    .brand-inner { position: relative; z-index: 1; max-width: 420px; }
-    .brand-logo { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700; color: var(--gold); letter-spacing: 2px; margin-bottom: 1.5rem; }
-    .brand-tagline { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: white; line-height: 1.2; margin-bottom: 1.25rem; font-weight: 700; }
-    .brand-tagline span { color: var(--gold); }
-    .brand-desc { color: rgba(255,255,255,0.6); font-size: 1rem; line-height: 1.75; margin-bottom: 2.5rem; }
-    .brand-stats { display: flex; gap: 2rem; margin-bottom: 2.5rem; }
-    .brand-stat .num { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); font-weight: 700; display: block; }
-    .brand-stat .lbl { font-size: 0.78rem; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1.5px; }
-    .brand-verse { border-left: 3px solid rgba(244,196,48,0.4); padding-left: 1.25rem; }
-    .brand-verse p { color: rgba(255,255,255,0.65); font-style: italic; font-size: 0.92rem; line-height: 1.65; margin-bottom: 0.4rem; }
-    .brand-verse span { font-size: 0.78rem; color: var(--gold); font-weight: 600; letter-spacing: 1px; }
+    /* Brand panel */
+    .auth-brand { background: var(--navy); position: relative; display: flex; align-items: center; justify-content: center; padding: 3rem; overflow: hidden; }
+    .auth-brand::before { content:''; position:absolute; inset:0; background-image: linear-gradient(rgba(244,196,48,0.04) 1px,transparent 1px), linear-gradient(90deg,rgba(244,196,48,0.04) 1px,transparent 1px); background-size:50px 50px; }
+    .brand-glow { position:absolute; inset:0; background:radial-gradient(ellipse 80% 70% at 30% 50%,rgba(244,196,48,0.1),transparent 70%); pointer-events:none; }
+    .brand-inner { position:relative; z-index:1; max-width:420px; }
+    .brand-logo { font-family:'Playfair Display',serif; font-size:3rem; font-weight:700; color:var(--gold); letter-spacing:2px; margin-bottom:1.5rem; }
+    .brand-tagline { font-family:'Playfair Display',serif; font-size:2.5rem; color:white; line-height:1.2; margin-bottom:1.25rem; font-weight:700; }
+    .brand-tagline span { color:var(--gold); }
+    .brand-desc { color:rgba(255,255,255,0.6); font-size:1rem; line-height:1.75; margin-bottom:2.5rem; }
+    .brand-stats { display:flex; gap:2rem; margin-bottom:2.5rem; }
+    .brand-stat .num { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--gold); font-weight:700; display:block; }
+    .brand-stat .lbl { font-size:0.78rem; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:1.5px; }
+    .brand-verse { border-left:3px solid rgba(244,196,48,0.4); padding-left:1.25rem; }
+    .brand-verse p { color:rgba(255,255,255,0.65); font-style:italic; font-size:0.92rem; line-height:1.65; margin-bottom:0.4rem; }
+    .brand-verse span { font-size:0.78rem; color:var(--gold); font-weight:600; letter-spacing:1px; }
 
-    /* ── Auth panel ── */
-    .auth-panel {
-      background: var(--white);
-      display: flex; align-items: flex-start; justify-content: center;
-      padding: 2rem 1.5rem;
-      overflow-y: auto;
-      min-height: 100vh;
-    }
-    .auth-card {
-      width: 100%; max-width: 440px;
-      padding: 2rem 0;
-      animation: fadeUp 0.5s ease;
-    }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    /* Auth panel */
+    .auth-panel { background:var(--white); display:flex; align-items:flex-start; justify-content:center; padding:2rem 1.5rem; overflow-y:auto; min-height:100vh; }
+    .auth-card { width:100%; max-width:440px; padding:2rem 0; animation:fadeUp 0.5s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
-    /* ── Tabs ── */
-    .auth-tabs {
-      display: flex; background: var(--off-white);
-      border-radius: var(--radius); padding: 4px; margin-bottom: 2rem; gap: 4px;
+    /* Tabs */
+    .auth-tabs { display:flex; background:var(--off-white); border-radius:var(--radius); padding:4px; margin-bottom:2rem; gap:4px; }
+    .auth-tab { flex:1; padding:10px; border:none; background:transparent; border-radius:calc(var(--radius) - 4px); font-size:0.9rem; font-weight:600; color:var(--gray); cursor:pointer; transition:0.2s; font-family:'DM Sans',sans-serif; }
+    .auth-tab.active { background:var(--white); color:var(--navy); box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+
+    /* Form elements */
+    .form-title { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:var(--navy); margin-bottom:0.5rem; }
+    .form-sub { font-size:0.9rem; color:var(--gray-dark); margin-bottom:1.75rem; line-height:1.6; }
+    .form-group { margin-bottom:1rem; display:flex; flex-direction:column; gap:6px; }
+    .form-group label { font-size:0.84rem; font-weight:600; color:var(--navy); }
+    .form-group input { padding:13px 14px; border:1.5px solid rgba(11,28,44,0.12); border-radius:var(--radius-sm); font-size:0.95rem; outline:none; transition:0.2s; color:var(--navy); background:white; width:100%; font-family:'DM Sans',sans-serif; }
+    .form-group input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(244,196,48,0.12); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+
+    /* Password input with show/hide */
+    .password-wrap { position:relative; }
+    .password-wrap input { padding-right:44px; }
+    .show-pass { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1rem; color:var(--gray); transition:0.2s; }
+    .show-pass:hover { color:var(--navy); }
+
+    /* OTP inputs */
+    .otp-wrap { display:flex; gap:8px; justify-content:center; margin:0.5rem 0; }
+    .otp-digit { width:48px !important; height:56px; text-align:center; font-size:1.4rem !important; font-weight:700 !important; border:2px solid rgba(11,28,44,0.15) !important; border-radius:var(--radius) !important; padding:0 !important; background:var(--off-white) !important; caret-color:var(--gold); transition:0.2s !important; }
+    .otp-digit:focus { border-color:var(--gold) !important; background:white !important; box-shadow:0 0 0 3px rgba(244,196,48,0.15) !important; outline:none; }
+    .otp-digit.filled { border-color:var(--navy) !important; background:white !important; }
+
+    /* PIN inputs (masked) */
+    .pin-wrap { display:flex; gap:8px; justify-content:center; margin:0.5rem 0; }
+    .pin-digit { width:52px !important; height:60px; text-align:center; font-size:1.6rem !important; font-weight:700 !important; border:2px solid rgba(11,28,44,0.15) !important; border-radius:var(--radius) !important; padding:0 !important; background:var(--off-white) !important; caret-color:var(--gold); transition:0.2s !important; -webkit-text-security:disc; }
+    .pin-digit:focus { border-color:var(--gold) !important; background:white !important; box-shadow:0 0 0 3px rgba(244,196,48,0.15) !important; outline:none; }
+    .pin-digit.filled { border-color:var(--navy) !important; background:white !important; }
+
+    /* Pledge */
+    .pledge-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:1rem; font-size:0.84rem; color:var(--gray-dark); line-height:1.5; }
+    .pledge-row input[type="checkbox"] { width:18px; height:18px; accent-color:var(--navy); flex-shrink:0; margin-top:2px; cursor:pointer; }
+
+    /* Badges */
+    .info-badge { display:flex; align-items:flex-start; gap:8px; background:rgba(244,196,48,0.08); border:1px solid rgba(244,196,48,0.25); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:1.5rem; font-size:0.82rem; color:#744210; font-weight:500; line-height:1.5; }
+    .security-badge { display:flex; align-items:flex-start; gap:8px; background:rgba(72,187,120,0.08); border:1px solid rgba(72,187,120,0.25); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:1.5rem; font-size:0.82rem; color:#276749; font-weight:500; line-height:1.5; }
+    .warn-badge { display:flex; align-items:flex-start; gap:8px; background:rgba(237,137,54,0.1); border:1px solid rgba(237,137,54,0.3); border-radius:var(--radius-sm); padding:8px 12px; font-size:0.82rem; color:#c05621; font-weight:600; margin-top:0.75rem; display:none; }
+
+    /* Step indicator */
+    .step-indicator { display:flex; align-items:center; margin-bottom:1.75rem; }
+    .step-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; flex-shrink:0; transition:0.3s; }
+    .step-dot.done { background:var(--green); color:white; }
+    .step-dot.active { background:var(--navy); color:var(--gold); border:2px solid var(--gold); }
+    .step-dot.pending { background:var(--off-white); color:var(--gray); border:1.5px solid rgba(11,28,44,0.12); }
+    .step-line { flex:1; height:2px; background:rgba(11,28,44,0.1); transition:0.3s; }
+    .step-line.done { background:var(--green); }
+
+    /* Button */
+    .auth-btn { width:100%; padding:14px; background:var(--navy); color:white; border:none; border-radius:var(--radius-sm); font-size:0.98rem; font-weight:600; cursor:pointer; transition:0.2s; margin-top:0.5rem; position:relative; overflow:hidden; font-family:'DM Sans',sans-serif; }
+    .auth-btn::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--gold),#f9dc7a); }
+    .auth-btn:hover { background:var(--navy-light); transform:translateY(-1px); box-shadow:var(--shadow-md); }
+    .auth-btn:disabled { opacity:0.65; cursor:not-allowed; transform:none; }
+
+    /* Errors */
+    .err { font-size:0.8rem; color:var(--red); display:none; margin-top:2px; }
+    .err.show { display:block; }
+    .global-err { margin-top:1rem; padding:12px 16px; background:#fff5f5; border:1px solid #fed7d7; border-radius:var(--radius-sm); color:#c53030; font-size:0.88rem; border-left:3px solid var(--red); display:none; }
+    .global-ok { margin-top:1rem; padding:12px 16px; background:rgba(72,187,120,0.08); border:1px solid rgba(72,187,120,0.3); border-radius:var(--radius-sm); color:#276749; font-size:0.88rem; border-left:3px solid var(--green); display:none; }
+
+    /* Links */
+    .auth-switch { text-align:center; margin-top:1.25rem; font-size:0.88rem; color:var(--gray-dark); }
+    .auth-switch a { color:var(--navy); font-weight:600; cursor:pointer; text-decoration:underline; }
+    .link-btn { background:none; border:none; color:var(--gray-dark); font-size:0.84rem; cursor:pointer; text-decoration:underline; font-family:'DM Sans',sans-serif; }
+    .link-btn:hover { color:var(--navy); }
+    .req { color:var(--gold-dark); }
+
+    /* Success */
+    .success-box { text-align:center; padding:2rem 0; }
+    .success-box .icon { font-size:3.5rem; display:block; margin-bottom:1rem; animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes pop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    .success-box h3 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:0.5rem; }
+    .success-box p { color:var(--gray-dark); font-size:0.9rem; }
+
+    /* Divider */
+    .divider { display:flex; align-items:center; gap:1rem; margin:1.25rem 0; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:rgba(11,28,44,0.1); }
+    .divider span { font-size:0.78rem; color:var(--gray); font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+
+    /* Mobile */
+    @media (max-width:768px) {
+      .auth-split { grid-template-columns:1fr; }
+      .auth-brand { display:none; }
+      .auth-panel { background:var(--navy); padding:1.5rem 1.25rem; align-items:flex-start; }
+      .auth-card { background:var(--white); padding:2rem; border-radius:var(--radius-lg); box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+      .form-row { grid-template-columns:1fr; }
+      .otp-digit { width:42px !important; height:50px; font-size:1.2rem !important; }
+      .pin-digit { width:44px !important; height:54px; font-size:1.4rem !important; }
+      .otp-wrap, .pin-wrap { gap:6px; }
     }
-    .auth-tab {
-      flex: 1; padding: 10px; border: none; background: transparent;
-      border-radius: calc(var(--radius) - 4px); font-size: 0.9rem; font-weight: 600;
-      color: var(--gray); cursor: pointer; transition: 0.2s; font-family: 'DM Sans', sans-serif;
-    }
-    .auth-tab.active { background: var(--white); color: var(--navy); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-
-    /* ── Form ── */
-    .auth-form-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
-    .auth-form-sub { font-size: 0.9rem; color: var(--gray-dark); margin-bottom: 1.75rem; line-height: 1.6; }
-    .form-group { margin-bottom: 1.1rem; display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 0.84rem; font-weight: 600; color: var(--navy); }
-    .form-group input, .form-group select {
-      padding: 12px 14px;
-      border: 1.5px solid rgba(11,28,44,0.12);
-      border-radius: var(--radius-sm);
-      font-size: 0.93rem; outline: none;
-      transition: 0.2s; color: var(--navy); background: white;
-      width: 100%; font-family: 'DM Sans', sans-serif;
-    }
-    .form-group input:focus, .form-group select:focus {
-      border-color: var(--gold); box-shadow: 0 0 0 3px rgba(244,196,48,0.12);
-    }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-
-    /* ── OTP ── */
-    .otp-wrap { display: flex; gap: 8px; justify-content: center; margin: 0.5rem 0; }
-    .otp-digit {
-      width: 48px !important; height: 56px; text-align: center;
-      font-size: 1.4rem !important; font-weight: 700 !important;
-      border: 2px solid rgba(11,28,44,0.15) !important;
-      border-radius: var(--radius) !important; padding: 0 !important;
-      background: var(--off-white) !important; caret-color: var(--gold);
-      transition: 0.2s !important;
-    }
-    .otp-digit:focus { border-color: var(--gold) !important; background: white !important; box-shadow: 0 0 0 3px rgba(244,196,48,0.15) !important; outline: none; }
-    .otp-digit.filled { border-color: var(--navy) !important; background: white !important; }
-
-    /* ── Pledge ── */
-    .pledge-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem; font-size: 0.84rem; color: var(--gray-dark); line-height: 1.5; }
-    .pledge-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--navy); flex-shrink: 0; margin-top: 2px; cursor: pointer; }
-    .pledge-row label { cursor: pointer; }
-
-    /* ── Button ── */
-    .auth-btn {
-      width: 100%; padding: 14px; background: var(--navy); color: white;
-      border: none; border-radius: var(--radius-sm); font-size: 0.98rem;
-      font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 0.5rem;
-      position: relative; overflow: hidden; font-family: 'DM Sans', sans-serif;
-    }
-    .auth-btn::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), #f9dc7a); }
-    .auth-btn:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-    .auth-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
-
-    /* ── Errors ── */
-    .err { font-size: 0.8rem; color: #e53e3e; display: none; margin-top: 2px; }
-    .err.show { display: block; }
-    .global-err {
-      margin-top: 1rem; padding: 12px 16px;
-      background: #fff5f5; border: 1px solid #fed7d7; border-radius: var(--radius-sm);
-      color: #c53030; font-size: 0.88rem; border-left: 3px solid #e53e3e; display: none;
-    }
-
-    /* ── Links ── */
-    .auth-switch { text-align: center; margin-top: 1.25rem; font-size: 0.88rem; color: var(--gray-dark); }
-    .auth-switch a { color: var(--navy); font-weight: 600; cursor: pointer; text-decoration: underline; }
-    .link-btn { background: none; border: none; color: var(--gray-dark); font-size: 0.84rem; cursor: pointer; text-decoration: underline; font-family: 'DM Sans', sans-serif; }
-    .link-btn:hover { color: var(--navy); }
-    .req { color: var(--gold-dark); }
-
-    /* ── Success ── */
-    .success-box { text-align: center; padding: 2rem 0; }
-    .success-box .icon { font-size: 3.5rem; display: block; margin-bottom: 1rem; animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
-    @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .success-box h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; }
-    .success-box p { color: var(--gray-dark); font-size: 0.9rem; }
-
-    /* ── Mobile ── */
-    @media (max-width: 768px) {
-      .auth-split { grid-template-columns: 1fr; }
-      .auth-brand { display: none; }
-      .auth-panel { padding: 1.5rem 1.25rem; align-items: flex-start; }
-      .auth-card { padding: 1.5rem 0; }
-      .form-row { grid-template-columns: 1fr; }
-      .otp-digit { width: 42px !important; height: 50px; font-size: 1.2rem !important; }
-      .otp-wrap { gap: 6px; }
+    @media (max-width:380px) {
+      .otp-digit { width:38px !important; height:46px; }
+      .pin-digit { width:40px !important; height:50px; }
+      .otp-wrap, .pin-wrap { gap:5px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Loader -->
-  <div id="page-loader">
-    <div class="loader-logo">KOINA</div>
-    <div class="loader-bar"><div class="loader-fill"></div></div>
-  </div>
+<div id="page-loader">
+  <div class="loader-logo">KOINA</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
 
-  <div class="auth-split">
+<div class="auth-split">
 
-    <!-- Left: Brand -->
-    <div class="auth-brand">
-      <div class="brand-glow"></div>
-      <div class="brand-inner">
-        <div class="brand-logo">KOINA</div>
-        <h2 class="brand-tagline">Where <span>Faith</span><br>Meets Function</h2>
-        <p class="brand-desc">Connect with skilled Christians across Africa and beyond. Serve, grow, and build Kingdom relationships.</p>
-        <div class="brand-stats">
-          <div class="brand-stat"><span class="num">2.4K+</span><span class="lbl">Members</span></div>
-          <div class="brand-stat"><span class="num">18+</span><span class="lbl">Countries</span></div>
-          <div class="brand-stat"><span class="num">500+</span><span class="lbl">Skills</span></div>
-        </div>
-        <div class="brand-verse">
-          <p>"As iron sharpens iron, so one person sharpens another."</p>
-          <span>— Proverbs 27:17</span>
-        </div>
+  <!-- Brand -->
+  <div class="auth-brand">
+    <div class="brand-glow"></div>
+    <div class="brand-inner">
+      <div class="brand-logo">KOINA</div>
+      <h2 class="brand-tagline">Where <span>Faith</span><br>Meets Function</h2>
+      <p class="brand-desc">Connect with skilled Christians across Africa and beyond. Serve, grow, and build Kingdom relationships.</p>
+      <div class="brand-stats">
+        <div class="brand-stat"><span class="num">2.4K+</span><span class="lbl">Members</span></div>
+        <div class="brand-stat"><span class="num">18+</span><span class="lbl">Countries</span></div>
+        <div class="brand-stat"><span class="num">500+</span><span class="lbl">Skills</span></div>
       </div>
-    </div>
-
-    <!-- Right: Form -->
-    <div class="auth-panel">
-      <div class="auth-card">
-
-        <!-- Tabs -->
-        <div class="auth-tabs">
-          <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
-          <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Create Account</button>
-        </div>
-
-        <!-- ══ SIGN IN ══ -->
-        <div id="login-section">
-          <div id="login-step-1">
-            <h3 class="auth-form-title">Welcome back 👋</h3>
-            <p class="auth-form-sub">Enter your email to receive a sign-in code.</p>
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" id="login-email" placeholder="e.g. loveth@gmail.com" />
-              <span class="err" id="login-email-err"></span>
-            </div>
-            <button class="auth-btn" id="login-send-btn" onclick="sendLoginCode()">
-              <span class="btn-text">Send Sign-In Code ✉️</span>
-              <span class="btn-loader" style="display:none;">Sending...</span>
-            </button>
-            <p class="auth-switch">No account yet? <a onclick="switchTab('register')">Create one →</a></p>
-          </div>
-
-          <div id="login-step-2" style="display:none;">
-            <h3 class="auth-form-title">Check your email 📧</h3>
-            <p class="auth-form-sub" id="login-hint">We sent a 6-digit code. Enter it below.</p>
-            <div class="form-group">
-              <label>6-Digit Code</label>
-              <div class="otp-wrap">
-                <input type="text" maxlength="1" class="otp-digit login-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit login-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit login-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit login-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit login-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit login-d" inputmode="numeric" />
-              </div>
-              <span class="err" id="login-otp-err"></span>
-            </div>
-            <button class="auth-btn" onclick="verifyLoginCode()">
-              <span class="btn-text">Verify & Sign In →</span>
-              <span class="btn-loader" style="display:none;">Verifying...</span>
-            </button>
-            <div style="text-align:center;margin-top:1rem;">
-              <button class="link-btn" onclick="backTo('login')">← Change email</button>
-              &nbsp;·&nbsp;
-              <button class="link-btn" onclick="sendLoginCode()">Resend code</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ══ REGISTER ══ -->
-        <div id="register-section" style="display:none;">
-          <div id="reg-step-1">
-            <h3 class="auth-form-title">Join KOINA ✝️</h3>
-            <p class="auth-form-sub">Create your account and connect with the Kingdom community.</p>
-
-            <div class="form-group">
-              <label>Full Name <span class="req">*</span></label>
-              <input type="text" id="reg-name" placeholder="e.g. ThankGod Onoja" />
-              <span class="err" id="reg-name-err"></span>
-            </div>
-            <div class="form-group">
-              <label>Display Name <span class="req">*</span></label>
-              <input type="text" id="reg-display" placeholder="How you appear e.g. Bro. ThankGod" />
-              <span class="err" id="reg-display-err"></span>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Church</label>
-                <input type="text" id="reg-church" placeholder="e.g. Redeemed Christian church of God" />
-              </div>
-              <div class="form-group">
-                <label>Location</label>
-                <input type="text" id="reg-location" placeholder="e.g. Lagos, Nigeria" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Email Address <span class="req">*</span></label>
-              <input type="email" id="reg-email" placeholder="e.g. onoja@gail.com" />
-              <span class="err" id="reg-email-err"></span>
-            </div>
-            <div class="pledge-row">
-              <input type="checkbox" id="reg-pledge" />
-              <label for="reg-pledge">I agree to represent Christ with excellence and integrity on KOINA</label>
-            </div>
-            <span class="err" id="reg-pledge-err"></span>
-            <button class="auth-btn" id="reg-send-btn" onclick="sendRegCode()">
-              <span class="btn-text">Send Verification Code ✉️</span>
-              <span class="btn-loader" style="display:none;">Sending...</span>
-            </button>
-            <p class="auth-switch">Already have an account? <a onclick="switchTab('login')">Sign in →</a></p>
-          </div>
-
-          <div id="reg-step-2" style="display:none;">
-            <h3 class="auth-form-title">Check your email 📧</h3>
-            <p class="auth-form-sub" id="reg-hint">We sent a 6-digit code. Enter it to create your account.</p>
-            <div class="form-group">
-              <label>6-Digit Code</label>
-              <div class="otp-wrap">
-                <input type="text" maxlength="1" class="otp-digit reg-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit reg-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit reg-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit reg-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit reg-d" inputmode="numeric" />
-                <input type="text" maxlength="1" class="otp-digit reg-d" inputmode="numeric" />
-              </div>
-              <span class="err" id="reg-otp-err"></span>
-            </div>
-            <button class="auth-btn" onclick="verifyRegCode()">
-              <span class="btn-text">Create My Account 🎉</span>
-              <span class="btn-loader" style="display:none;">Creating account...</span>
-            </button>
-            <div style="text-align:center;margin-top:1rem;">
-              <button class="link-btn" onclick="backTo('reg')">← Change email</button>
-              &nbsp;·&nbsp;
-              <button class="link-btn" onclick="sendRegCode()">Resend code</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Global error -->
-        <div class="global-err" id="global-err"></div>
-
+      <div class="brand-verse">
+        <p>"As iron sharpens iron, so one person sharpens another."</p>
+        <span>— Proverbs 27:17</span>
       </div>
     </div>
   </div>
 
-  <!-- Supabase SDK loaded from CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Auth Panel -->
+  <div class="auth-panel">
+    <div class="auth-card">
 
-  <script>
-    /* ══════════════════════════════════════
-       KOINA CONFIG — paste your keys here
-       ══════════════════════════════════════ */
-    const SUPABASE_URL     = 'https://gwwkrkfwbbqziobxremq.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_-Neb-DYAunyqn780-Qo0Hw_boljiq1-'; // ← paste your sb_publis... key
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Create Account</button>
+      </div>
 
-    /* ── Create client ── */
-    const { createClient } = supabase;
-    const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      <!-- ══════════════════════════════
+           SIGN IN
+      ══════════════════════════════ -->
+      <div id="login-section">
 
-    /* ── Loader ── */
-    window.addEventListener('load', () => {
-      setTimeout(() => document.getElementById('page-loader')?.classList.add('hidden'), 1200);
+        <!-- SCREEN A: Returning user — Email + Password on same screen -->
+        <div id="login-screen-a">
+          <h3 class="form-title">Welcome back 👋</h3>
+          <p class="form-sub">Sign in with your email and 6-digit password.</p>
+
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="login-email" placeholder="e.g. emmanuel@gmail.com" />
+            <span class="err" id="login-email-err"></span>
+          </div>
+
+          <div class="form-group">
+            <label>6-Digit Password</label>
+            <div class="pin-wrap" id="login-pass-wrap">
+              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
+            </div>
+            <span class="err" id="login-pass-err"></span>
+            <div class="warn-badge" id="login-attempts-warn">⚠️ <span id="login-attempts-text"></span></div>
+          </div>
+
+          <button class="auth-btn" id="login-btn" onclick="signIn()">
+            <span class="btn-text">Sign In →</span>
+            <span class="btn-loader" style="display:none;">Signing in...</span>
+          </button>
+
+          <p class="auth-switch" style="margin-top:1rem;">
+            No account yet? <a onclick="switchTab('register')">Create one →</a>
+          </p>
+        </div>
+
+        <!-- SCREEN B: Admin PIN (after password, for staff only) -->
+        <div id="login-screen-b" style="display:none;">
+          <div class="step-indicator">
+            <div class="step-dot done">✓</div>
+            <div class="step-line done"></div>
+            <div class="step-dot active">2</div>
+          </div>
+          <h3 class="form-title">Admin PIN 🔐</h3>
+          <p class="form-sub">Enter your secret admin PIN to complete sign-in.</p>
+          <div class="security-badge">
+            <span>🛡️</span>
+            <span>This extra layer protects privileged access. Your PIN is never stored as plain text.</span>
+          </div>
+          <div class="form-group">
+            <label>6-Digit Admin PIN</label>
+            <div class="pin-wrap">
+              <input type="text" maxlength="1" class="pin-digit login-pin-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pin-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pin-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pin-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pin-digit" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit login-pin-digit" inputmode="numeric" />
+            </div>
+            <span class="err" id="login-pin-err"></span>
+            <div class="warn-badge" id="login-pin-warn">⚠️ <span id="login-pin-warn-text"></span></div>
+          </div>
+          <button class="auth-btn" onclick="verifyAdminPIN()">
+            <span class="btn-text">🔐 Verify PIN & Enter</span>
+            <span class="btn-loader" style="display:none;">Verifying...</span>
+          </button>
+          <div style="text-align:center;margin-top:1rem;">
+            <button class="link-btn" onclick="cancelAdminLogin()">← Sign out and start over</button>
+          </div>
+        </div>
+
+        <!-- SCREEN C: First-time admin — set PIN -->
+        <div id="login-screen-c" style="display:none;">
+          <div class="step-indicator">
+            <div class="step-dot done">✓</div>
+            <div class="step-line done"></div>
+            <div class="step-dot active">2</div>
+          </div>
+          <h3 class="form-title">Set Your Admin PIN 🔐</h3>
+          <p class="form-sub">First admin login detected. Set a secret 6-digit PIN you'll use every time.</p>
+          <div class="info-badge">
+            <span>⚠️</span>
+            <span>Choose a PIN only you know. This cannot be recovered without system admin help.</span>
+          </div>
+          <div class="form-group">
+            <label>Choose 6-Digit PIN</label>
+            <div class="pin-wrap">
+              <input type="text" maxlength="1" class="pin-digit setup-pin1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin1" inputmode="numeric" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Confirm PIN</label>
+            <div class="pin-wrap">
+              <input type="text" maxlength="1" class="pin-digit setup-pin2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit setup-pin2" inputmode="numeric" />
+            </div>
+            <span class="err" id="setup-pin-err"></span>
+          </div>
+          <button class="auth-btn" onclick="setupAdminPIN()">
+            <span class="btn-text">✅ Set PIN & Enter Admin</span>
+            <span class="btn-loader" style="display:none;">Saving...</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════════════
+           REGISTER
+      ══════════════════════════════ -->
+      <div id="register-section" style="display:none;">
+
+        <!-- Step 1: Details + Email -->
+        <div id="reg-step-1">
+          <h3 class="form-title">Join KOINA ✝️</h3>
+          <p class="form-sub">Create your account. You only do this once.</p>
+
+          <div class="form-group">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" id="reg-name" placeholder="e.g. Emmanuel Osei" />
+            <span class="err" id="reg-name-err"></span>
+          </div>
+          <div class="form-group">
+            <label>Display Name <span class="req">*</span></label>
+            <input type="text" id="reg-display" placeholder="How you appear e.g. Bro. Emmanuel" />
+            <span class="err" id="reg-display-err"></span>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Church</label>
+              <input type="text" id="reg-church" placeholder="e.g. Grace Chapel" />
+            </div>
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" id="reg-location" placeholder="e.g. Accra, Ghana" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Email Address <span class="req">*</span></label>
+            <input type="email" id="reg-email" placeholder="e.g. emmanuel@gmail.com" />
+            <span class="err" id="reg-email-err"></span>
+          </div>
+          <div class="pledge-row">
+            <input type="checkbox" id="reg-pledge" />
+            <label for="reg-pledge">I agree to represent Christ with excellence and integrity on KOINA</label>
+          </div>
+          <span class="err" id="reg-pledge-err"></span>
+
+          <button class="auth-btn" id="reg-send-btn" onclick="sendRegOTP()">
+            <span class="btn-text">Send Verification Code ✉️</span>
+            <span class="btn-loader" style="display:none;">Sending...</span>
+          </button>
+          <p class="auth-switch">Already have an account? <a onclick="switchTab('login')">Sign in →</a></p>
+        </div>
+
+        <!-- Step 2: Verify OTP -->
+        <div id="reg-step-2" style="display:none;">
+          <div class="step-indicator">
+            <div class="step-dot done">✓</div>
+            <div class="step-line"></div>
+            <div class="step-dot active">2</div>
+            <div class="step-line pending"></div>
+            <div class="step-dot pending">3</div>
+          </div>
+          <h3 class="form-title">Check your email 📧</h3>
+          <p class="form-sub" id="reg-otp-hint">Enter the 6-digit code we sent you.</p>
+          <div class="form-group">
+            <label>6-Digit Code</label>
+            <div class="otp-wrap">
+              <input type="text" maxlength="1" class="otp-digit reg-otp" inputmode="numeric" />
+              <input type="text" maxlength="1" class="otp-digit reg-otp" inputmode="numeric" />
+              <input type="text" maxlength="1" class="otp-digit reg-otp" inputmode="numeric" />
+              <input type="text" maxlength="1" class="otp-digit reg-otp" inputmode="numeric" />
+              <input type="text" maxlength="1" class="otp-digit reg-otp" inputmode="numeric" />
+              <input type="text" maxlength="1" class="otp-digit reg-otp" inputmode="numeric" />
+            </div>
+            <span class="err" id="reg-otp-err"></span>
+          </div>
+          <button class="auth-btn" onclick="verifyRegOTP()">
+            <span class="btn-text">Verify Code →</span>
+            <span class="btn-loader" style="display:none;">Verifying...</span>
+          </button>
+          <div style="text-align:center;margin-top:1rem;">
+            <button class="link-btn" onclick="backToRegStep1()">← Change email</button>
+            &nbsp;·&nbsp;
+            <button class="link-btn" onclick="sendRegOTP()">Resend code</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Set 6-digit password -->
+        <div id="reg-step-3" style="display:none;">
+          <div class="step-indicator">
+            <div class="step-dot done">✓</div>
+            <div class="step-line done"></div>
+            <div class="step-dot done">✓</div>
+            <div class="step-line"></div>
+            <div class="step-dot active">3</div>
+          </div>
+          <h3 class="form-title">Set Your Password 🔑</h3>
+          <p class="form-sub">Choose a 6-digit password. You'll use this every time you sign in — no more OTP needed!</p>
+          <div class="info-badge">
+            <span>💡</span>
+            <span>This replaces the OTP for future logins. Just email + this password and you're in.</span>
+          </div>
+          <div class="form-group">
+            <label>Choose 6-Digit Password</label>
+            <div class="pin-wrap">
+              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <div class="pin-wrap">
+              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
+              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
+            </div>
+            <span class="err" id="new-pass-err"></span>
+          </div>
+          <button class="auth-btn" onclick="setUserPassword()">
+            <span class="btn-text">🎉 Create Account & Enter</span>
+            <span class="btn-loader" style="display:none;">Creating account...</span>
+          </button>
+        </div>
+
+      </div>
+
+      <div class="global-err" id="global-err"></div>
+      <div class="global-ok"  id="global-ok"></div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ════════════════════════════════════════
+   KOINA Login — Paste your keys below
+════════════════════════════════════════ */
+const SUPABASE_URL      = 'https://gwwkrkfwbbqziobxremq.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_-Neb-DYAunyqn780-Qo0Hw_boljiq1-'; // ← paste sb_publis... key
+
+const { createClient } = supabase;
+const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ── Loader ── */
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('page-loader')?.classList.add('hidden'), 1200);
+});
+
+/* ── If already fully logged in, redirect ── */
+(async () => {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) return;
+  const { data: profile } = await _supabase.from('profiles').select('role,admin_pin_hash').eq('id', session.user.id).single();
+  if (!profile) return;
+  if (['admin','moderator'].includes(profile.role)) {
+    const pinVerified = sessionStorage.getItem('koina_pin_verified');
+    if (pinVerified === session.user.id) { window.location.href = 'index.html'; }
+    // else stay — need to verify PIN
+  } else {
+    window.location.href = 'index.html';
+  }
+})();
+
+/* ── Helpers ── */
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('login-section').style.display    = isLogin ? 'block' : 'none';
+  document.getElementById('register-section').style.display = isLogin ? 'none'  : 'block';
+  document.getElementById('tab-login').classList.toggle('active', isLogin);
+  document.getElementById('tab-register').classList.toggle('active', !isLogin);
+  clearAll(); scrollTop();
+}
+
+function scrollTop() { document.querySelector('.auth-panel').scrollTop = 0; }
+
+function showErr(id, msg)   { const el=document.getElementById(id); if(el){ el.textContent=msg; el.classList.add('show'); el.style.display='block'; } }
+function hideErr(id)        { const el=document.getElementById(id); if(el){ el.textContent=''; el.classList.remove('show'); el.style.display='none'; } }
+function showGlobalErr(msg) { const el=document.getElementById('global-err'); if(el){ el.textContent='❌ '+msg; el.style.display='block'; } }
+function showGlobalOk(msg)  { const el=document.getElementById('global-ok');  if(el){ el.textContent='✅ '+msg; el.style.display='block'; } }
+function clearAll() {
+  ['global-err','global-ok'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+}
+
+function getDigits(cls) { return Array.from(document.querySelectorAll('.'+cls)).map(d=>d.value).join(''); }
+function clearDigits(cls) { document.querySelectorAll('.'+cls).forEach(d=>{ d.value=''; d.classList.remove('filled'); }); }
+
+function setBtnLoading(id, on) {
+  const btn = document.getElementById(id); if(!btn) return;
+  btn.disabled = on;
+  const t=btn.querySelector('.btn-text'); const l=btn.querySelector('.btn-loader');
+  if(t) t.style.display = on?'none':'inline';
+  if(l) l.style.display = on?'inline':'none';
+}
+
+function showLoginScreen(name) {
+  ['login-screen-a','login-screen-b','login-screen-c'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.style.display='none';
+  });
+  const el = document.getElementById('login-screen-' + name);
+  if(el) { el.style.display='block'; scrollTop(); }
+}
+
+/* ── OTP/PIN digit auto-advance ── */
+function initDigits(cls) {
+  const digits = Array.from(document.querySelectorAll('.'+cls));
+  digits.forEach((inp, i) => {
+    inp.addEventListener('input', () => {
+      const v = inp.value.replace(/\D/g,''); inp.value=v;
+      if(v){ inp.classList.add('filled'); if(i<digits.length-1) digits[i+1].focus(); }
+      else inp.classList.remove('filled');
+    });
+    inp.addEventListener('keydown', e => {
+      if(e.key==='Backspace' && !inp.value && i>0){ digits[i-1].value=''; digits[i-1].classList.remove('filled'); digits[i-1].focus(); }
+      if(e.key==='Enter') {
+        if(cls==='login-pass-digit') signIn();
+        if(cls==='login-pin-digit')  verifyAdminPIN();
+        if(cls==='reg-otp')          verifyRegOTP();
+      }
+    });
+    inp.addEventListener('paste', e => {
+      e.preventDefault();
+      const p = e.clipboardData.getData('text').replace(/\D/g,'').slice(0,6);
+      p.split('').forEach((c,j)=>{ if(digits[j]){ digits[j].value=c; digits[j].classList.add('filled'); } });
+      digits[Math.min(p.length,5)].focus();
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['login-pass-digit','login-pin-digit','setup-pin1','setup-pin2','reg-otp','new-pass1','new-pass2'].forEach(initDigits);
+});
+
+/* ══════════════════════════════════════
+   SIGN IN FLOW
+══════════════════════════════════════ */
+let loginUserId = '';
+
+async function signIn() {
+  clearAll();
+  hideErr('login-email-err'); hideErr('login-pass-err');
+  document.getElementById('login-attempts-warn').style.display = 'none';
+
+  const email    = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = getDigits('login-pass-digit');
+
+  // Validate
+  if (!email || !email.includes('@')) { showErr('login-email-err','Please enter a valid email.'); return; }
+  if (password.length < 6)            { showErr('login-pass-err','Please enter all 6 digits.'); return; }
+
+  const btn = document.getElementById('login-btn');
+  setBtnLoading('login-btn', true);
+
+  try {
+    // Step 1: Sign in with OTP to get a session (magic link / OTP silent)
+    // We use signInWithPassword approach via our own function
+    // First get user id by email
+    const { data: sessionData, error: sessionErr } = await _supabase.auth.signInWithOtp({
+      email, options: { shouldCreateUser: false }
+    });
+    // Actually we verify password directly — sign in with OTP to establish session
+    // then immediately verify password server-side
+    // Better approach: use signInWithPassword if we stored password in auth.users
+    // Since we're using our own hash: sign in via magic link then verify
+    // We need a different flow: use the password to get session
+
+    // Real flow: We sign in the user silently using our RPC
+    // First check if user exists and password matches
+    const { data: lookup } = await _supabase
+      .from('profiles')
+      .select('id, role, admin_pin_hash, password_set, user_password_hash')
+      .eq('id', (await _supabase.auth.getUser()).data?.user?.id || 'none')
+      .single();
+
+    // Since we can't get user id without session, use email lookup via RPC
+    const { data: verifyData, error: verifyErr } = await _supabase.rpc('sign_in_with_password', {
+      email_input: email,
+      password_input: password
     });
 
-    /* ── Redirect if already logged in ── */
-    (async () => {
-      const { data: { session } } = await _supabase.auth.getSession();
-      if (session) window.location.href = 'index.html';
-    })();
+    if (verifyErr) throw verifyErr;
 
-    /* ══ HELPERS ══ */
-    function switchTab(tab) {
-      const isLogin = tab === 'login';
-      document.getElementById('login-section').style.display = isLogin ? 'block' : 'none';
-      document.getElementById('register-section').style.display = isLogin ? 'none' : 'block';
-      document.getElementById('tab-login').classList.toggle('active', isLogin);
-      document.getElementById('tab-register').classList.toggle('active', !isLogin);
-      hideGlobalErr();
-      // Scroll to top of form on mobile
-      document.querySelector('.auth-panel').scrollTop = 0;
-    }
-
-    function showErr(id, msg) {
-      const el = document.getElementById(id);
-      if (el) { el.textContent = msg; el.classList.add('show'); el.style.display = 'block'; }
-    }
-    function hideErr(id) {
-      const el = document.getElementById(id);
-      if (el) { el.textContent = ''; el.classList.remove('show'); el.style.display = 'none'; }
-    }
-    function showGlobalErr(msg) {
-      const el = document.getElementById('global-err');
-      if (el) { el.textContent = '❌ ' + msg; el.style.display = 'block'; }
-    }
-    function hideGlobalErr() {
-      const el = document.getElementById('global-err');
-      if (el) el.style.display = 'none';
-    }
-
-    function getOTP(cls) {
-      return Array.from(document.querySelectorAll('.' + cls)).map(i => i.value).join('');
-    }
-    function clearOTP(cls) {
-      document.querySelectorAll('.' + cls).forEach(i => { i.value = ''; i.classList.remove('filled'); });
-    }
-
-    function setBtnLoading(id, on) {
-      const btn = document.getElementById(id);
-      if (!btn) return;
-      btn.disabled = on;
-      const t = btn.querySelector('.btn-text');
-      const l = btn.querySelector('.btn-loader');
-      if (t) t.style.display = on ? 'none' : 'inline';
-      if (l) l.style.display = on ? 'inline' : 'none';
-    }
-
-    /* ── OTP auto-advance ── */
-    function initOTP(cls) {
-      const digits = Array.from(document.querySelectorAll('.' + cls));
-      digits.forEach((inp, i) => {
-        inp.addEventListener('input', () => {
-          const v = inp.value.replace(/\D/g, '');
-          inp.value = v;
-          if (v) { inp.classList.add('filled'); if (i < digits.length - 1) digits[i + 1].focus(); }
-          else inp.classList.remove('filled');
-        });
-        inp.addEventListener('keydown', e => {
-          if (e.key === 'Backspace' && !inp.value && i > 0) {
-            digits[i - 1].value = '';
-            digits[i - 1].classList.remove('filled');
-            digits[i - 1].focus();
-          }
-        });
-        inp.addEventListener('paste', e => {
-          e.preventDefault();
-          const p = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-          p.split('').forEach((c, j) => { if (digits[j]) { digits[j].value = c; digits[j].classList.add('filled'); } });
-          digits[Math.min(p.length, 5)].focus();
-        });
-      });
-    }
-
-    function backTo(mode) {
-      if (mode === 'login') {
-        document.getElementById('login-step-1').style.display = 'block';
-        document.getElementById('login-step-2').style.display = 'none';
-        clearOTP('login-d');
+    if (!verifyData.success) {
+      if (verifyData.locked) {
+        document.getElementById('login-attempts-warn').style.display = 'flex';
+        document.getElementById('login-attempts-text').textContent = verifyData.message;
+      } else if (verifyData.no_password) {
+        showGlobalErr('No password set for this account. Please register again or contact support.');
+      } else if (verifyData.not_found) {
+        showGlobalErr('No account found with this email. Please create an account first.');
       } else {
-        document.getElementById('reg-step-1').style.display = 'block';
-        document.getElementById('reg-step-2').style.display = 'none';
-        clearOTP('reg-d');
+        document.getElementById('login-attempts-warn').style.display = 'flex';
+        document.getElementById('login-attempts-text').textContent =
+          `Incorrect password. ${verifyData.attempts_left} attempt${verifyData.attempts_left!==1?'s':''} left.`;
+        clearDigits('login-pass-digit');
+        setTimeout(()=>document.querySelector('.login-pass-digit')?.focus(),100);
       }
-      hideGlobalErr();
+      setBtnLoading('login-btn', false);
+      return;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initOTP('login-d');
-      initOTP('reg-d');
+    // Password correct — now create a real session via OTP
+    loginUserId = verifyData.user_id;
+
+    // Sign in the user using Supabase auth OTP (silent — sends email)
+    // We use a custom approach: call our RPC that returns a session token
+    // For now: use signInWithOtp and store userId, then verify PIN if staff
+    // Complete session via the verified user
+    await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+
+    // Store email for session completion after OTP silent verify
+    sessionStorage.setItem('koina_pending_login', JSON.stringify({ email, userId: verifyData.user_id, role: verifyData.role, has_pin: verifyData.has_pin }));
+
+    // Check if staff
+    if (['admin','moderator'].includes(verifyData.role)) {
+      if (verifyData.has_pin) {
+        showLoginScreen('b');
+        setTimeout(()=>document.querySelector('.login-pin-digit')?.focus(),100);
+      } else {
+        showLoginScreen('c');
+        setTimeout(()=>document.querySelector('.setup-pin1')?.focus(),100);
+      }
+    } else {
+      // Regular user — complete login
+      showGlobalOk('Signing you in...');
+      // Send OTP for session verification silently
+      await completeUserLogin(email);
+    }
+
+  } catch(err) {
+    showGlobalErr(err.message || 'Sign in failed. Please try again.');
+  } finally {
+    setBtnLoading('login-btn', false);
+  }
+}
+
+async function completeUserLogin(email) {
+  // For regular users — we need a real Supabase session
+  // Send OTP and auto-complete (user just needs to click link in email)
+  // OR we redirect to a "check email" screen for the magic link
+  // Best UX: send magic link, redirect to index when they click
+  showGlobalOk('Opening your session... Check email if not redirected.');
+
+  // Listen for auth state change
+  const { data: { subscription } } = _supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      subscription.unsubscribe();
+      window.location.href = 'index.html';
+    }
+  });
+
+  // Give them 30 seconds, then show message
+  setTimeout(() => {
+    showGlobalOk('Check your email for a sign-in link, or try again.');
+  }, 5000);
+}
+
+async function cancelAdminLogin() {
+  await _supabase.auth.signOut();
+  sessionStorage.removeItem('koina_pin_verified');
+  sessionStorage.removeItem('koina_pending_login');
+  showLoginScreen('a');
+  clearDigits('login-pass-digit');
+  clearDigits('login-pin-digit');
+}
+
+async function verifyAdminPIN() {
+  clearAll();
+  hideErr('login-pin-err');
+  document.getElementById('login-pin-warn').style.display='none';
+
+  const pin = getDigits('login-pin-digit');
+  if(pin.length<6){ showErr('login-pin-err','Please enter all 6 digits.'); return; }
+
+  const pending = JSON.parse(sessionStorage.getItem('koina_pending_login')||'{}');
+  if(!pending.userId){ showLoginScreen('a'); return; }
+
+  const btn = document.querySelector('#login-screen-b .auth-btn');
+  if(btn){ btn.disabled=true; btn.querySelector('.btn-text').style.display='none'; btn.querySelector('.btn-loader').style.display='inline'; }
+
+  try {
+    const { data } = await _supabase.rpc('verify_admin_pin', { user_id: pending.userId, pin_input: pin });
+    if(data?.success) {
+      sessionStorage.setItem('koina_pin_verified', pending.userId);
+      // Complete login session
+      await _supabase.auth.signInWithOtp({ email: pending.email, options: { shouldCreateUser: false } });
+      showGlobalOk('PIN verified! Check your email for the sign-in link to complete login...');
+      // Listen for session
+      _supabase.auth.onAuthStateChange((event, session) => {
+        if(event==='SIGNED_IN' && session) window.location.href='index.html';
+      });
+    } else if(data?.locked) {
+      document.getElementById('login-pin-warn').style.display='flex';
+      document.getElementById('login-pin-warn-text').textContent = data.message;
+      if(btn){ btn.disabled=true; }
+    } else {
+      document.getElementById('login-pin-warn').style.display='flex';
+      document.getElementById('login-pin-warn-text').textContent =
+        `Wrong PIN. ${data?.attempts_left??''} attempt${data?.attempts_left!==1?'s':''} left.`;
+      clearDigits('login-pin-digit');
+      if(btn){ btn.disabled=false; btn.querySelector('.btn-text').style.display='inline'; btn.querySelector('.btn-loader').style.display='none'; }
+      setTimeout(()=>document.querySelector('.login-pin-digit')?.focus(),100);
+    }
+  } catch(e) {
+    showErr('login-pin-err', e.message||'Verification failed.');
+    if(btn){ btn.disabled=false; btn.querySelector('.btn-text').style.display='inline'; btn.querySelector('.btn-loader').style.display='none'; }
+  }
+}
+
+async function setupAdminPIN() {
+  hideErr('setup-pin-err');
+  const pin1 = getDigits('setup-pin1');
+  const pin2 = getDigits('setup-pin2');
+  if(pin1.length<6){ showErr('setup-pin-err','Please fill in both PIN fields.'); return; }
+  if(pin1!==pin2)  { showErr('setup-pin-err','PINs do not match. Try again.'); clearDigits('setup-pin2'); return; }
+
+  const pending = JSON.parse(sessionStorage.getItem('koina_pending_login')||'{}');
+  if(!pending.userId){ showLoginScreen('a'); return; }
+
+  const btn = document.querySelector('#login-screen-c .auth-btn');
+  if(btn){ btn.disabled=true; btn.querySelector('.btn-text').style.display='none'; btn.querySelector('.btn-loader').style.display='inline'; }
+
+  try {
+    const { data } = await _supabase.rpc('set_admin_pin', { user_id: pending.userId, new_pin: pin1 });
+    if(data?.success) {
+      sessionStorage.setItem('koina_pin_verified', pending.userId);
+      await _supabase.auth.signInWithOtp({ email: pending.email, options: { shouldCreateUser: false } });
+      showGlobalOk('PIN set! Check your email for the sign-in link...');
+      _supabase.auth.onAuthStateChange((event, session) => {
+        if(event==='SIGNED_IN' && session) window.location.href='index.html';
+      });
+    } else {
+      showErr('setup-pin-err', data?.message||'Failed to set PIN.');
+      if(btn){ btn.disabled=false; btn.querySelector('.btn-text').style.display='inline'; btn.querySelector('.btn-loader').style.display='none'; }
+    }
+  } catch(e) {
+    showErr('setup-pin-err', e.message||'Error.');
+    if(btn){ btn.disabled=false; btn.querySelector('.btn-text').style.display='inline'; btn.querySelector('.btn-loader').style.display='none'; }
+  }
+}
+
+/* ══════════════════════════════════════
+   REGISTER FLOW
+══════════════════════════════════════ */
+let regEmail='', regData={}, regUserId='';
+
+async function sendRegOTP() {
+  ['reg-name-err','reg-display-err','reg-email-err','reg-pledge-err'].forEach(hideErr);
+  clearAll();
+  const name    = document.getElementById('reg-name').value.trim();
+  const display = document.getElementById('reg-display').value.trim();
+  const church  = document.getElementById('reg-church').value.trim();
+  const loc     = document.getElementById('reg-location').value.trim();
+  const email   = document.getElementById('reg-email').value.trim().toLowerCase();
+  const pledge  = document.getElementById('reg-pledge').checked;
+  let ok = true;
+  if(!name)    { showErr('reg-name-err','Full name is required.');    ok=false; }
+  if(!display) { showErr('reg-display-err','Display name required.'); ok=false; }
+  if(!email||!email.includes('@')) { showErr('reg-email-err','Valid email required.'); ok=false; }
+  if(!pledge)  { showErr('reg-pledge-err','Please accept the pledge.'); ok=false; }
+  if(!ok) return;
+
+  regEmail = email;
+  regData  = { full_name:name, display_name:display, church, location:loc };
+  setBtnLoading('reg-send-btn', true);
+
+  try {
+    const { error } = await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true, data:{ display_name:display, full_name:name } } });
+    if(error) throw error;
+    document.getElementById('reg-step-1').style.display='none';
+    document.getElementById('reg-step-2').style.display='block';
+    document.getElementById('reg-otp-hint').textContent=`Code sent to ${email}. Check inbox & spam.`;
+    scrollTop();
+    setTimeout(()=>document.querySelector('.reg-otp')?.focus(),100);
+  } catch(e) {
+    showGlobalErr(e.message||'Could not send code. Try again.');
+  } finally { setBtnLoading('reg-send-btn',false); }
+}
+
+async function verifyRegOTP() {
+  hideErr('reg-otp-err'); clearAll();
+  const token = getDigits('reg-otp');
+  if(token.length<6){ showErr('reg-otp-err','Please enter all 6 digits.'); return; }
+  const btn = document.querySelector('#reg-step-2 .auth-btn');
+  if(btn){ btn.disabled=true; btn.querySelector('.btn-text').style.display='none'; btn.querySelector('.btn-loader').style.display='inline'; }
+  try {
+    const { data, error } = await _supabase.auth.verifyOtp({ email:regEmail, token, type:'email' });
+    if(error) throw error;
+    regUserId = data.user.id;
+
+    // Save profile (without password yet)
+    await _supabase.from('profiles').upsert({
+      id: regUserId,
+      full_name: regData.full_name,
+      display_name: regData.display_name,
+      church: regData.church||null,
+      location: regData.location||null,
+      role: 'member',
+      password_set: false,
+      joined_at: new Date().toISOString()
     });
 
-    /* ══ LOGIN ══ */
-    let loginEmail = '';
+    // Move to password setup
+    document.getElementById('reg-step-2').style.display='none';
+    document.getElementById('reg-step-3').style.display='block';
+    scrollTop();
+    setTimeout(()=>document.querySelector('.new-pass1')?.focus(),100);
+  } catch(e) {
+    showErr('reg-otp-err', e.message||'Invalid or expired code.');
+    if(btn){ btn.disabled=false; btn.querySelector('.btn-text').style.display='inline'; btn.querySelector('.btn-loader').style.display='none'; }
+  }
+}
 
-    async function sendLoginCode() {
-      hideErr('login-email-err'); hideGlobalErr();
-      const email = document.getElementById('login-email').value.trim().toLowerCase();
-      if (!email || !email.includes('@')) { showErr('login-email-err', 'Please enter a valid email.'); return; }
-      loginEmail = email;
-      setBtnLoading('login-send-btn', true);
-      try {
-        const { error } = await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
-        if (error) throw error;
-        document.getElementById('login-step-1').style.display = 'none';
-        document.getElementById('login-step-2').style.display = 'block';
-        document.getElementById('login-hint').textContent = `Code sent to ${email}. Check your inbox & spam folder.`;
-        document.querySelector('.auth-panel').scrollTop = 0;
-        setTimeout(() => document.querySelector('.login-d')?.focus(), 150);
-      } catch (err) {
-        showGlobalErr(err.message?.includes('user') ? 'No account found. Please create an account first.' : (err.message || 'Could not send code. Try again.'));
-      } finally { setBtnLoading('login-send-btn', false); }
-    }
+async function setUserPassword() {
+  hideErr('new-pass-err'); clearAll();
+  const pass1 = getDigits('new-pass1');
+  const pass2 = getDigits('new-pass2');
+  if(pass1.length<6){ showErr('new-pass-err','Please fill in both password fields.'); return; }
+  if(pass1!==pass2) { showErr('new-pass-err','Passwords do not match. Try again.'); clearDigits('new-pass2'); return; }
 
-    async function verifyLoginCode() {
-      hideErr('login-otp-err'); hideGlobalErr();
-      const token = getOTP('login-d');
-      if (token.length < 6) { showErr('login-otp-err', 'Please enter all 6 digits.'); return; }
-      const btn = document.querySelector('#login-step-2 .auth-btn');
-      if (btn) { btn.disabled = true; btn.querySelector('.btn-text').style.display = 'none'; btn.querySelector('.btn-loader').style.display = 'inline'; }
-      try {
-        const { error } = await _supabase.auth.verifyOtp({ email: loginEmail, token, type: 'email' });
-        if (error) throw error;
-        window.location.href = 'index.html';
-      } catch (err) {
-        showErr('login-otp-err', 'Invalid or expired code. Please try again.');
-        if (btn) { btn.disabled = false; btn.querySelector('.btn-text').style.display = 'inline'; btn.querySelector('.btn-loader').style.display = 'none'; }
-      }
-    }
+  const btn = document.querySelector('#reg-step-3 .auth-btn');
+  if(btn){ btn.disabled=true; btn.querySelector('.btn-text').style.display='none'; btn.querySelector('.btn-loader').style.display='inline'; }
 
-    /* ══ REGISTER ══ */
-    let regEmail = '', regData = {};
+  try {
+    const { data } = await _supabase.rpc('set_user_password', { user_id: regUserId, new_password: pass1 });
+    if(!data?.success) throw new Error(data?.message||'Failed to set password.');
 
-    async function sendRegCode() {
-      ['reg-name-err','reg-display-err','reg-email-err','reg-pledge-err'].forEach(hideErr);
-      hideGlobalErr();
-      const name    = document.getElementById('reg-name').value.trim();
-      const display = document.getElementById('reg-display').value.trim();
-      const church  = document.getElementById('reg-church').value.trim();
-      const loc     = document.getElementById('reg-location').value.trim();
-      const email   = document.getElementById('reg-email').value.trim().toLowerCase();
-      const pledge  = document.getElementById('reg-pledge').checked;
-      let ok = true;
-      if (!name)    { showErr('reg-name-err',    'Full name is required.');    ok = false; }
-      if (!display) { showErr('reg-display-err', 'Display name is required.'); ok = false; }
-      if (!email || !email.includes('@')) { showErr('reg-email-err', 'Valid email is required.'); ok = false; }
-      if (!pledge)  { showErr('reg-pledge-err',  'Please accept the pledge.'); ok = false; }
-      if (!ok) return;
-      regEmail = email;
-      regData  = { full_name: name, display_name: display, church, location: loc };
-      setBtnLoading('reg-send-btn', true);
-      try {
-        const { error } = await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true, data: { display_name: display, full_name: name } } });
-        if (error) throw error;
-        document.getElementById('reg-step-1').style.display = 'none';
-        document.getElementById('reg-step-2').style.display = 'block';
-        document.getElementById('reg-hint').textContent = `Code sent to ${email}. Check your inbox & spam folder.`;
-        document.querySelector('.auth-panel').scrollTop = 0;
-        setTimeout(() => document.querySelector('.reg-d')?.focus(), 150);
-      } catch (err) {
-        showGlobalErr(err.message || 'Could not send code. Please try again.');
-      } finally { setBtnLoading('reg-send-btn', false); }
-    }
+    document.getElementById('reg-step-3').innerHTML=`
+      <div class="success-box">
+        <span class="icon">🎉</span>
+        <h3>Welcome to KOINA, ${regData.display_name}!</h3>
+        <p>Your account is ready. Redirecting you now...</p>
+      </div>`;
+    setTimeout(()=>window.location.href='index.html', 2000);
+  } catch(e) {
+    showErr('new-pass-err', e.message||'Error setting password.');
+    if(btn){ btn.disabled=false; btn.querySelector('.btn-text').style.display='inline'; btn.querySelector('.btn-loader').style.display='none'; }
+  }
+}
 
-    async function verifyRegCode() {
-      hideErr('reg-otp-err'); hideGlobalErr();
-      const token = getOTP('reg-d');
-      if (token.length < 6) { showErr('reg-otp-err', 'Please enter all 6 digits.'); return; }
-      const btn = document.querySelector('#reg-step-2 .auth-btn');
-      if (btn) { btn.disabled = true; btn.querySelector('.btn-text').style.display = 'none'; btn.querySelector('.btn-loader').style.display = 'inline'; }
-      try {
-        const { data, error } = await _supabase.auth.verifyOtp({ email: regEmail, token, type: 'email' });
-        if (error) throw error;
-        await _supabase.from('profiles').upsert({
-          id: data.user.id,
-          full_name: regData.full_name, display_name: regData.display_name,
-          church: regData.church || null, location: regData.location || null,
-          joined_at: new Date().toISOString()
-        });
-        document.getElementById('reg-step-2').innerHTML = `
-          <div class="success-box">
-            <span class="icon">🎉</span>
-            <h3>Welcome to KOINA, ${regData.display_name}!</h3>
-            <p>Your account is ready. Taking you in now...</p>
-          </div>`;
-        setTimeout(() => window.location.href = 'index.html', 2000);
-      } catch (err) {
-        showErr('reg-otp-err', err.message || 'Invalid or expired code. Please try again.');
-        if (btn) { btn.disabled = false; btn.querySelector('.btn-text').style.display = 'inline'; btn.querySelector('.btn-loader').style.display = 'none'; }
-      }
-    }
-  </script>
-
+function backToRegStep1() {
+  document.getElementById('reg-step-2').style.display='none';
+  document.getElementById('reg-step-1').style.display='block';
+  clearDigits('reg-otp'); clearAll(); scrollTop();
+}
+</script>
 </body>
 </html>
