@@ -406,23 +406,23 @@
           <div class="form-group">
             <label>Choose 6-Digit Password</label>
             <div class="pin-wrap">
-              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass1" inputmode="numeric" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass1" inputmode="numeric" aria-label="Password digit 1" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass1" inputmode="numeric" aria-label="Password digit 2" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass1" inputmode="numeric" aria-label="Password digit 3" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass1" inputmode="numeric" aria-label="Password digit 4" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass1" inputmode="numeric" aria-label="Password digit 5" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass1" inputmode="numeric" aria-label="Password digit 6" />
             </div>
           </div>
           <div class="form-group">
             <label>Confirm Password</label>
             <div class="pin-wrap">
-              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit new-pass2" inputmode="numeric" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass2" inputmode="numeric" aria-label="Confirm password digit 1" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass2" inputmode="numeric" aria-label="Confirm password digit 2" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass2" inputmode="numeric" aria-label="Confirm password digit 3" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass2" inputmode="numeric" aria-label="Confirm password digit 4" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass2" inputmode="numeric" aria-label="Confirm password digit 5" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit new-pass2" inputmode="numeric" aria-label="Confirm password digit 6" />
             </div>
             <span class="err" id="new-pass-err"></span>
           </div>
@@ -755,7 +755,7 @@ async function setUserPassword() {
   hideErr('new-pass-err'); clearAll();
   const pass1 = getDigits('new-pass1');
   const pass2 = getDigits('new-pass2');
-  if(pass1.length<6){ showErr('new-pass-err','Please fill in both password fields.'); return; }
+  if(!/^\d{6}$/.test(pass1) || !/^\d{6}$/.test(pass2)){ showErr('new-pass-err','Password must contain exactly 6 numbers.'); return; }
   if(pass1!==pass2) { showErr('new-pass-err','Passwords do not match. Try again.'); clearDigits('new-pass2'); return; }
 
   const btn = document.querySelector('#reg-step-3 .auth-btn');
