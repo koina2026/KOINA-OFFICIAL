@@ -206,12 +206,12 @@
           <div class="form-group">
             <label>6-Digit Password</label>
             <div class="pin-wrap" id="login-pass-wrap">
-              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
-              <input type="text" maxlength="1" class="pin-digit login-pass-digit" inputmode="numeric" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit login-pass-digit" inputmode="numeric" aria-label="Login password digit 1" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit login-pass-digit" inputmode="numeric" aria-label="Login password digit 2" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit login-pass-digit" inputmode="numeric" aria-label="Login password digit 3" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit login-pass-digit" inputmode="numeric" aria-label="Login password digit 4" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit login-pass-digit" inputmode="numeric" aria-label="Login password digit 5" />
+              <input type="tel" maxlength="1" pattern="[0-9]" class="pin-digit login-pass-digit" inputmode="numeric" aria-label="Login password digit 6" />
             </div>
             <span class="err" id="login-pass-err"></span>
             <div class="warn-badge" id="login-attempts-warn">⚠️ <span id="login-attempts-text"></span></div>
