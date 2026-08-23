@@ -452,6 +452,11 @@ async function initAdmin() {
     return;
   }
 
+  if (sessionStorage.getItem('koina_pin_verified') !== adminUser.id) {
+    window.location.href = 'login.html';
+    return;
+  }
+
   // Moderators cannot see the Users/Members tab
   if (role === 'moderator') {
     document.getElementById('users-nav-btn').style.display = 'none';
@@ -479,6 +484,7 @@ async function initAdmin() {
 // ── Logout ──
 async function adminLogout() {
   await _supabase.auth.signOut();
+  sessionStorage.removeItem('koina_pin_verified');
   window.location.href = 'login.html';
 }
 

@@ -562,68 +562,28 @@ async function signIn() {
   setBtnLoading('login-btn', true);
 
   try {
-    // Step 1: Sign in with OTP to get a session (magic link / OTP silent)
-    // We use signInWithPassword approach via our own function
-    // First get user id by email
-    const { data: sessionData, error: sessionErr } = await _supabase.auth.signInWithOtp({
-      email, options: { shouldCreateUser: false }
-    });
-    // Actually we verify password directly — sign in with OTP to establish session
-    // then immediately verify password server-side
-    // Better approach: use signInWithPassword if we stored password in auth.users
-    // Since we're using our own hash: sign in via magic link then verify
-    // We need a different flow: use the password to get session
+    const { data: authData, error: authError } = await _supabase.auth.signInWithPassword({ email, password });
+    if (authError) throw authError;
 
-    // Real flow: We sign in the user silently using our RPC
-    // First check if user exists and password matches
-    const { data: lookup } = await _supabase
+    const { data: profile, error: profileError } = await _supabase
       .from('profiles')
-      .select('id, role, admin_pin_hash, password_set, user_password_hash')
-      .eq('id', (await _supabase.auth.getUser()).data?.user?.id || 'none')
+      .select('id, role, admin_pin_hash')
+      .eq('id', authData.user.id)
       .single();
+    if (profileError) throw profileError;
+    if (!profile) throw new Error('Your account profile could not be found.');
 
-    // Since we can't get user id without session, use email lookup via RPC
-    const { data: verifyData, error: verifyErr } = await _supabase.rpc('sign_in_with_password', {
-      email_input: email,
-      password_input: password
-    });
-
-    if (verifyErr) throw verifyErr;
-
-    if (!verifyData.success) {
-      if (verifyData.locked) {
-        document.getElementById('login-attempts-warn').style.display = 'flex';
-        document.getElementById('login-attempts-text').textContent = verifyData.message;
-      } else if (verifyData.no_password) {
-        showGlobalErr('No password set for this account. Please register again or contact support.');
-      } else if (verifyData.not_found) {
-        showGlobalErr('No account found with this email. Please create an account first.');
-      } else {
-        document.getElementById('login-attempts-warn').style.display = 'flex';
-        document.getElementById('login-attempts-text').textContent =
-          `Incorrect password. ${verifyData.attempts_left} attempt${verifyData.attempts_left!==1?'s':''} left.`;
-        clearDigits('login-pass-digit');
-        setTimeout(()=>document.querySelector('.login-pass-digit')?.focus(),100);
-      }
-      setBtnLoading('login-btn', false);
-      return;
-    }
-
-    // Password correct — now create a real session via OTP
-    loginUserId = verifyData.user_id;
-
-    // Sign in the user using Supabase auth OTP (silent — sends email)
-    // We use a custom approach: call our RPC that returns a session token
-    // For now: use signInWithOtp and store userId, then verify PIN if staff
-    // Complete session via the verified user
-    await _supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
-
-    // Store email for session completion after OTP silent verify
-    sessionStorage.setItem('koina_pending_login', JSON.stringify({ email, userId: verifyData.user_id, role: verifyData.role, has_pin: verifyData.has_pin }));
+    loginUserId = authData.user.id;
+    sessionStorage.setItem('koina_pending_login', JSON.stringify({
+      email,
+      userId: authData.user.id,
+      role: profile.role,
+      has_pin: Boolean(profile.admin_pin_hash)
+    }));
 
     // Check if staff
-    if (['admin','moderator'].includes(verifyData.role)) {
-      if (verifyData.has_pin) {
+    if (['admin','moderator'].includes(profile.role)) {
+      if (profile.admin_pin_hash) {
         showLoginScreen('b');
         setTimeout(()=>document.querySelector('.login-pin-digit')?.focus(),100);
       } else {
@@ -631,10 +591,8 @@ async function signIn() {
         setTimeout(()=>document.querySelector('.setup-pin1')?.focus(),100);
       }
     } else {
-      // Regular user — complete login
-      showGlobalOk('Signing you in...');
-      // Send OTP for session verification silently
-      await completeUserLogin(email);
+      sessionStorage.removeItem('koina_pending_login');
+      window.location.href = 'index.html';
     }
 
   } catch(err) {
@@ -642,27 +600,6 @@ async function signIn() {
   } finally {
     setBtnLoading('login-btn', false);
   }
-}
-
-async function completeUserLogin(email) {
-  // For regular users — we need a real Supabase session
-  // Send OTP and auto-complete (user just needs to click link in email)
-  // OR we redirect to a "check email" screen for the magic link
-  // Best UX: send magic link, redirect to index when they click
-  showGlobalOk('Opening your session... Check email if not redirected.');
-
-  // Listen for auth state change
-  const { data: { subscription } } = _supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      subscription.unsubscribe();
-      window.location.href = 'index.html';
-    }
-  });
-
-  // Give them 30 seconds, then show message
-  setTimeout(() => {
-    showGlobalOk('Check your email for a sign-in link, or try again.');
-  }, 5000);
 }
 
 async function cancelAdminLogin() {
@@ -692,13 +629,8 @@ async function verifyAdminPIN() {
     const { data } = await _supabase.rpc('verify_admin_pin', { user_id: pending.userId, pin_input: pin });
     if(data?.success) {
       sessionStorage.setItem('koina_pin_verified', pending.userId);
-      // Complete login session
-      await _supabase.auth.signInWithOtp({ email: pending.email, options: { shouldCreateUser: false } });
-      showGlobalOk('PIN verified! Check your email for the sign-in link to complete login...');
-      // Listen for session
-      _supabase.auth.onAuthStateChange((event, session) => {
-        if(event==='SIGNED_IN' && session) window.location.href='index.html';
-      });
+      sessionStorage.removeItem('koina_pending_login');
+      window.location.href = 'index.html';
     } else if(data?.locked) {
       document.getElementById('login-pin-warn').style.display='flex';
       document.getElementById('login-pin-warn-text').textContent = data.message;
@@ -734,11 +666,8 @@ async function setupAdminPIN() {
     const { data } = await _supabase.rpc('set_admin_pin', { user_id: pending.userId, new_pin: pin1 });
     if(data?.success) {
       sessionStorage.setItem('koina_pin_verified', pending.userId);
-      await _supabase.auth.signInWithOtp({ email: pending.email, options: { shouldCreateUser: false } });
-      showGlobalOk('PIN set! Check your email for the sign-in link...');
-      _supabase.auth.onAuthStateChange((event, session) => {
-        if(event==='SIGNED_IN' && session) window.location.href='index.html';
-      });
+      sessionStorage.removeItem('koina_pending_login');
+      window.location.href = 'index.html';
     } else {
       showErr('setup-pin-err', data?.message||'Failed to set PIN.');
       if(btn){ btn.disabled=false; btn.querySelector('.btn-text').style.display='inline'; btn.querySelector('.btn-loader').style.display='none'; }
@@ -799,7 +728,7 @@ async function verifyRegOTP() {
     regUserId = data.user.id;
 
     // Save profile (without password yet)
-    await _supabase.from('profiles').upsert({
+    const { error: profileError } = await _supabase.from('profiles').upsert({
       id: regUserId,
       full_name: regData.full_name,
       display_name: regData.display_name,
@@ -809,6 +738,7 @@ async function verifyRegOTP() {
       password_set: false,
       joined_at: new Date().toISOString()
     });
+    if (profileError) throw profileError;
 
     // Move to password setup
     document.getElementById('reg-step-2').style.display='none';
@@ -832,15 +762,22 @@ async function setUserPassword() {
   if(btn){ btn.disabled=true; btn.querySelector('.btn-text').style.display='none'; btn.querySelector('.btn-loader').style.display='inline'; }
 
   try {
-    const { data } = await _supabase.rpc('set_user_password', { user_id: regUserId, new_password: pass1 });
-    if(!data?.success) throw new Error(data?.message||'Failed to set password.');
+    const { error: passwordError } = await _supabase.auth.updateUser({ password: pass1 });
+    if (passwordError) throw passwordError;
+    const { error: profileUpdateError } = await _supabase
+      .from('profiles')
+      .update({ password_set: true })
+      .eq('id', regUserId);
+    if (profileUpdateError) throw profileUpdateError;
 
-    document.getElementById('reg-step-3').innerHTML=`
+    const successBox = document.getElementById('reg-step-3');
+    successBox.innerHTML=`
       <div class="success-box">
         <span class="icon">🎉</span>
-        <h3>Welcome to KOINA, ${regData.display_name}!</h3>
+        <h3></h3>
         <p>Your account is ready. Redirecting you now...</p>
       </div>`;
+    successBox.querySelector('h3').textContent = `Welcome to KOINA, ${regData.display_name}!`;
     setTimeout(()=>window.location.href='index.html', 2000);
   } catch(e) {
     showErr('new-pass-err', e.message||'Error setting password.');
